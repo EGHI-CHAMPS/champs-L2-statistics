@@ -1,0 +1,129 @@
+﻿code,assay,gene_target
+ABAU_1,Acinetobacter baumannii,OXA-51
+ADEV_1,Adenovirus,hexon
+AD4X_1,Adenovirus 40/41,fiber protein
+AERO_1,Aeromonas spp.,glycosyltransferase
+ASLU_1,Ascaris lumbricoides,ITS
+ASTR_1,Astrovirus,capsid
+BART_1,Bartonella spp.,ssrA
+BPAR_1,"Bordetella parapertussi, Bordetella bronchiseptica (Insertion sequence IS1001)",IS1001
+BOP1_1,"Bordetella pertussis, Bordetella holmseii (Insertion sequence IS481)",IS481
+BOP2_1,Bordetella pertussis (pertussis toxin),ptxSI
+BRUC_1,Brucellaspp.,IS711
+BUPS_1,Burkholderia pseudomallei,ttsS
+CLDP_1,C. difficile paLOC,non-coding IS
+CLDA_1,C. difficile tcdA,tcdA
+CLDB_1,C. difficile tcdB,tcdB
+CACO_1,Campylobacter coli,cdtB
+CAJE_1,Campylobacter jejuni,hipO
+CAAL_1,Candida albicans,ITS1
+CCHF_1,Crimean-Congo Hemorrhagic Fever virus (CCHF),N
+CHIC_1,Chikungunya virus,NSP
+CHPN_1,Chlamydia pneumoniae,argR
+CHTR_1,Chlamydia trachomatis,tmRNA
+CODI_1,Corynebacterium diptheriae,rpoB
+COUP_1,"Corynebacterium ulcerans, Corynebacterium pseudotuberculosis",rpoB
+CTOX_1,Corynebactrium spp. (tox gene),tox
+COBU_1,Coxiella burnettii,IS1111A
+CRNG_1,"Cryptococcus neoformans, Cryptococcus gattii",hypothetical protein
+CRPA_1,Cryptosporidium parvum,hypothetical protein
+CYMV_1,Cytomegalovirus (CMV),glycoprotein B
+DENV_1,Dengue (pan),NSP
+ENHI_1,Entamoeba histolytica,18S
+EAE1_1,Escherichia coli (aaiC gene),aaiC
+EAE2_1,Escherichia coli (aatA gene),aatA
+EIES_1,Escherichia coli/Shigella (ipaH gene),ipaH
+ENFM_1,Enterococcus facium,ddl
+ENFC_1,Enterococcus faecalis,ddl
+ENTV_4,Enterovirus,polyprotein
+EPE2_1,Escherichia coli (bfpA gene),bfpA
+EPE1_1,Escherichia coli (eae gene),eae
+ECSH_1,Escherichia coli/Shigella,uidA
+ETLT_1,Escherichia coli (heat-labile enterotoxin),LT
+ETST_1,Escherichia coli (heat-stable enterotoxin),STh/STp
+GIAR_1,Giardia spp,18S
+GAST_2,Group A Streptococcus,TetR
+GBST_1,Group B Streptococcus,cfb
+HIAT_1,Haemophilus influenzae,hpd3
+HITB_2,Haemophilus influenzae type B,bcsB
+HCV1_1,Human coronavirus 1 (229E),N
+HCV2_1,Human coronavirus 2 (NL63),N
+HCV3_1,Human coronavirus 3 (OC43),N
+HCV4_1,Human coronavirus 4 (HKU1),RdRp
+HEPE_1,Hepatitis E virus,capsid protein
+HMPV_1,Human metapneumovirus (HMPV),Fusion protein
+HSV1_1,Herpes simplex virus 1 (HSV1),envelope glycoprotein G
+HSV2_1,Herpes simplex virus 2 (HSV2),virion glycoprotein D
+RNP3_1,Human nucleic acid control (Rnase P),RnaseP
+FLUA_1,Influenza A,M
+FLUB_1,Influenza B,NEP
+IPCO_1,Internal Positive Control (IPCO),control plasmid
+JENV_1,Japanese encephalitis virus,polyprotein
+KLPN_1,Klebsiella pneumoniae,DC
+LAVP_1,"PAN Lassa Fever Virus, can cross react with other arenavirus",L segment
+LAVA_1,Lassa Fever Virus target 1,"S segment, GPC gene"
+LAVB_1,Lassa Fever Virus target 2,"S segment, GPC gene"
+LEPT_1,Leptospira (pan-serovar),lipL32
+LIMO_1,Listeria monocytogenes,prfA
+MEVS_1,Measles,N
+MRSN_1,MERS coronavirus (N gene),N
+MRSU_1,MERS coronavirus (upE gene),UpE
+MOCA_1,Moraxella catarrhalis,PurH
+MUMP_1,Mumps,N
+MS2P_1,MS2 phage for extraction control,MS2g1
+MYTB_1,Mycobacterium tuberculosis,IS6110
+MYPN_1,Mycoplasma pneumoniae,CARDS Tx
+NEGO_1,Neisseria gonorrhoeae,porA
+NMEN_1,Neisseria meningitidis,sodC
+NIPV_1,Nipah virus,N
+NOR1_1,Norovirus GI,ORF 1-2
+NOR2_1,Norovirus GII,ORF 1-2
+ORTS_1,Orientia tsutsugamushi,htrA
+HPEV_1,Parechovirus,polyprotein
+PARV_1,Parvovirus B19,VP2 capsid protein
+PIV1_2,Parainfluenza virus type 1,HN
+PIV2_1,Parainfluenza virus type 2,N
+PIV3_1,Parainfluenza virus type 3,HN
+PIV4_1,Parainfluenza virus type 4,N
+PLFA_1,Plasmodium falciparum,18S
+PLVI_1,Plasmodium vivax,18S
+PNJI_1,Pneumocystis jirovecii,DHPS
+PSAE_1,Pseudomonas aeruginosa,gyrB
+RESV_1,Respiratory syncytial virus (RSV),M
+RHIV_1,Rhinovirus,polyprotein
+RICK_1,Rickettsia spp.,50S
+RIVF_1,Rift Valley Fever,L
+ROTA_1,Rotavirus A,NSP3
+ROTB_1,Rotavirus B,NSP2
+ROTC_1,Rotavirus C,VP6
+ROTN_1,Rotavirus non-typable,NSP2
+RUBV_2,Rubella,NSP
+SAPA_1,Salmonella paratyphi A,hypothetical protein
+SALS_1,Salmonella spp.,ttrRSBCA
+SATY_1,Salmonella typhi,lpfA
+SAPX_1,Sapovirus I/II/IV,RdRp
+SAPV_1,Sapovirus V,RdRp
+STAU_2,Staphylococcus aureus,hypothetical protein
+STX1_1,Shiga toxin/Shiga-like toxin 1,stx1
+STX2_1,Shiga-like toxin 2,stx2
+STPN_2,Streptococcus pneumoniae,lytA
+STSU_1,Streptococcus suis,fbp
+TOXO_1,Toxoplasma gondii,18S
+TRPA_1,Treponema pallidum,polA
+TRTR_1,Trichuris trichuria,18S
+URUP_1,Ureaplasma spp.,URE
+VAZV_1,Varicella zoster virus,ORF62
+VICH_1,Vibrio cholerae,ompW
+VTOX_1,Vibrio cholerae toxigenic,ctxA
+WENV_1,West Nile Virus,polyprotein
+YEFV_1,Yellow Fever virus,polyprotein
+YERS_1,Yersinia spp.,pal
+ZIKA_1,Zika,polyprotein
+BORD_1,Bordatella spp.,
+CDIF_1,C. difficile,
+CDIP_1,C. diphtheria,
+HFLU_1,H. influenzae,
+LASS_1,Arenavirus/Lassa Fever,
+MCOR_1,MERS coronavirus,
+SALM_1,Salmonella spp.,
+VCHO_1,V. cholerae,

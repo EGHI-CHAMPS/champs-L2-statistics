@@ -1,0 +1,80 @@
+# navbar:
+#   title: "champs"
+#   type: inverse
+#   left:
+#     - text: "Home"
+#       href: index.html
+#     - text: "Loading Data"
+#       href: articles/data.html
+#     - text: "Usage"
+#       href: articles/usage.html
+#     - text: "Reference"
+#       href: reference/index.html
+#     # - text: "News"
+#     #   href: news/index.html
+#   right:
+#    - icon: fa-github
+#      href: https://github.com/ki-tools/champs
+
+articles:
+  - title: Articles
+    navbar: ~
+    contents:
+    - data_intro
+    - download
+    - data_load
+    - usage
+    - plots_tables
+    - calc_deepdive
+    - custom_analyses_h_influenzae
+
+# articles:
+# - title: Main verbs
+#   navbar: ~
+#   contents:
+#   - data
+#   - two-table
+#   - rowwise
+#   - colwise
+
+reference:
+  - title: "Data"
+    contents:
+      - get_l2_data
+      - load_data
+      - valid_conditions
+      - valid_pathogens
+      - valid_sites
+      - valid_specimen_types
+      - valid_icds
+      - valid_age_groups
+      - valid_age_subcats
+      - mock
+      - tac_table
+      - infectious_causes
+
+  - title: "Computing Statistics"
+    contents:
+      - calc_cc_allcases_by_site_age
+      - calc_cc_detected_by_site_age
+      - calc_detected_allcases_by_site_age
+      - calc_detected_by_decode
+      - calc_nspecimen_by_pmi
+      - calc_pmi_by_age_decode
+      - calc_pmi_by_decode_site
+      - calc_pmi_by_specimen_site
+      - calc_top_tac_pathogens
+      - calc_top_dcd_pathogens_by_acq
+      - calc_top_tac_pathogens_cc
+      - calc_top_etiol_by_age
+      - calc_cc_allcases_by_age_acq
+      - calc_syndrome_combinations
+      - calc_cc_by_age_syndrome
+
+  - title: "Producing Outputs"
+    contents:
+      - plot_margins_site_age
+      - heatmap_site_age
+      - plot_top_etiol_by_age
+      - plot_syndrome_combinations
+      - html_table_site_age

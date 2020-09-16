@@ -1,0 +1,134 @@
+---
+title: "Deep dive into a calc function"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Deep dive into a calc function}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(dplyr)
+library(champs)
+d <- load_data("../_ignore/CHAMPS_de_identified_data")
+# d <- load_data("_ignore/CHAMPS_de_identified_data")
+```
+
+In this article we illustrate in detail how to compute a common set of statistics of interest with CHAMPS data. This will help newcomers to CHAMPS data with understanding the nuances of the different tables and how they can be used together to answer questions of interest.
+
+We will illustrate a computation that is provided by the `calc_cc_detected_by_site_age()`, where we look at in how many cases was death due to a given condition  (etiology) in DeCoDe vs. how many cases a given pathogen was detected in TAC results, broken down by site and age. This requires merging information from the demographics, DeCoDe, and TAC tables.
+
+Before diving into the data, we assume that you have read the [CHAMPS introduction](data_intro.html) and [data](data_load.html) articles.
+
+In this example, we will be looking at in how many cases Group B Streptococcus was detected as a pathogen in the TAC results vs. how many cases were determined by DeCoDe for which Group B Streptococcus was in the causal chain.
+
+For a quick refresh on the distinction between TAC and DeCoDe:
+
+In TAC results, we are looking for detection of a *pathogen* in one or more *specimen types*. A pathogen is present if its result is "Positive".
+
+In DeCoDe, we are looking for detection of the *condition* that was in the *causal chain* of the cause of death. This is either provided as a *CHAMPS group description* or an *etiology*.
+
+The distinction between counting things in DeCoDe vs. TAC can be thought as comparing dying *from* a condition vs. dying *with* a pathogen.
+
+To begin our calculation, we load the package and the de-identified data, which here we have downloaded to a location `~/Downloads/CHAMPS_de_identified_data`.
+
+```r
+library(champs)
+library(dplyr)
+library(stringr)
+d <- load_data("~/Downloads/CHAMPS_de_identified_data")
+```
+
+We want to specify the condition and pathogen associated with Group B Streptococcus. Note that conditions and pathogens can overlap but may not always be expressed in the same way. You can call `valid_conditions(d)` to get a list of all conditions for which data exists (all unique values of etiologies or CHAMPS group descriptions), and you can call `valid_pathogens()` for a list of all valid pathogen values as detected by TAC.
+
+Searching the results of these `valid_` functions, we see that the condition we are looking for is not coded as "Group B Streptococcus", but as "Streptococcus agalactiae". The pathogen we are looking for, on the other hand, is simply "Group B Streptococcus".
+
+To start, let's look at the TAC results to find cases where there is a positive result for "Group B Streptococcus". We can either use the `tac_long` table or the `tac` table. Recall that the `tac` table looks like this:
+
+```{r}
+d$tac
+```
+
+While the `tac_long` table looks like this:
+
+```{r}
+d$tac_long
+```
+
+To count the cases that have a positive the Group B Streptococcus TAC result using the `tac` table, we would have to find all the column names that correspond with Group B Streptococcus and look for at least one positive result for each case (across all of the specimen types). This can get tedious and is not elegant to code.
+
+As an alternative, we can use the `tac_long` table much more conveniently. To find cases with a positive result for Group B Streptococcus, we search for a match in the `pathogen` variable and then filter down to only positive results. There can be more than one positive result for any given case (because there are multiple specimen types), so we want to make sure we only count unique cases.
+
+Below, we use dplyr's `filter()` function to filter down to positive Group B Streptococcus results, and then use dplyr's `pull()` function to select all of the case identifiers (`champd_deid`) and store the unique values in a result named `id`. Note that we are using the pipe operator `%>%` to send the result of each line of code into the next.
+
+```{r}
+ids_tac <- d$tac_long %>%
+  filter(pathogen == "Group B Streptococcus" & result == "Positive") %>%
+  pull(champs_deid) %>%
+  unique()
+
+length(ids_tac)
+```
+
+We see that there are `r length(ids_tac)` unique cases that have a positive result for Group B Streptococcus, or *died with* this pathogen.
+
+Now let's do a similar operation with the DeCoDe results. Similar to TAC, we will use the long format, `dcd_long` to find cases.
+
+Recall that `dcd_long` looks like this:
+
+```{r}
+d$dcd_long
+```
+
+To find cases where Group B Streptococcus is in the causal chain, we want to search in either the `champs_group_desc` variable or the `etiol` variable for the condition of interest. In our case, we know that the condition of interest, "Streptococcus agalactiae" is found in the `etiol` variable so we search there.
+
+```{r}
+ids_dcd <- d$dcd_long %>%
+  filter(etiol == "Streptococcus agalactiae") %>%
+  pull(champs_deid) %>%
+  unique()
+
+length(ids_dcd)
+```
+
+We see that there are `r length(ids_dcd)` unique cases that have Group B Streptococcus in the causal chain, or *died from* this condition.
+
+Now, we want to tabulate these cases by site and age, which means that we need to find the matching IDs for each in the demographics table. Suppose we only want to look at cases in Kenya, Mozambique, and Ethiopia. To do this for DeCoDe:
+
+```{r}
+sites <- c("Kenya", "Mozambique", "Ethiopia")
+
+dcd_dmg <- d$dmg %>%
+  filter(champs_deid %in% ids_dcd & site %in% sites)
+```
+
+Now, since the demographics table contains one row per case, we can tabulate the cases by age group and site using `xtabs()`. Note that there are many ways this could be done (e.g. using `group_by()` and `tally()`), but `xtabs()` provides a nice output for displaying in this example.
+
+```{r}
+xtabs(~ age_group + site, data = dcd_dmg, drop.unused.levels = TRUE) %>%
+  addmargins()
+```
+
+We can do the same for TAC:
+
+```{r}
+tac_dmg <- d$dmg %>%
+  filter(champs_deid %in% ids_tac & site %in% sites)
+
+xtabs(~ age_group + site, data = tac_dmg, drop.unused.levels = TRUE) %>%
+  addmargins()
+```
+
+<!--
+tac_tab <- d$dmg %>%
+  filter(champs_deid %in% ids_tac) %>%
+  group_by(site, age_group) %>%
+  tally()
+-->

@@ -1,0 +1,11 @@
+.nav>li>.nav>li>a {
+  position: relative;
+  display: block;
+  padding: 2px 25px;
+  color: gray;
+}
+
+.nav-pills>li>.nav-pills>li.active>a, .nav-pills>li>.nav-pills>li.active>a:focus, .nav-pills>li>.nav-pills>li.active>a:hover {
+  color: #fff;
+  background-color: gray;
+}

@@ -1,0 +1,277 @@
+---
+title: "Loading CHAMPS data and understanding its structure"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Loading CHAMPS data and understanding its structure}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+After registering with CHAMPS and downloading the data as described in [Downloading CHAMPS Data](download.html), this data can be read into a format suitable for anaysis in R using the `load_data()` function.
+
+# load_data()
+
+`load_data()` is called by providing the location of the folder containing the de-identified dataset csv files. It reads in each csv file and does some minimal processing to make data handling and analysis easier in R, but with the variables staying as true to the downloaded files as possible. It also provides some alternate data structures for some of the tables that make certain analyses easier.
+
+Suppose we have downloaded the csv files available in a directory `~/Downloads/CHAMPS_de_identified_data_2020-08-01`. We can load these data and assign it to a variable called `d` (you can choose whatever variable name you wish) with the following:
+
+```r
+library(champs)
+
+d <- load_data("~/Downloads/CHAMPS_de_identified_data_2020-08-01")
+#> Reading CHAMPS_dataset_version.csv...
+#> Reading CHAMPS_deid_basic_demographics.csv...
+#> Reading CHAMPS_deid_decode_results.csv...
+#> Reading CHAMPS_deid_lab_results.csv...
+#> Reading CHAMPS_deid_tac_results.csv...
+#> Reading CHAMPS_deid_verbal_autopsy.csv...
+#> Reading CHAMPS_ICD_Mappings.csv...
+#> Reading CHAMPS_icd10_descriptions.csv...
+#> Reading CHAMPS_vocabulary.csv...
+#> CHAMPS De-Identified Dataset v4.1 (2020-08-01)
+```
+
+As output, `load_data()` returns a list of data frames of each of the input tables along with long versions of the DeCoDe and TAC tables.
+
+```r
+d
+#> List of 11
+#>  $ version : tibble [1 × 3] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
+#>  $ dmg     : tibble [1,476 × 39] (S3: tbl_df/tbl/data.frame)
+#>  $ dcd     : tibble [1,476 × 66] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
+#>  $ lab     : tibble [1,474 × 185] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
+#>  $ tac     : tibble [1,473 × 325] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
+#>  $ va      : tibble [1,389 × 456] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
+#>  $ icd_map : tibble [649 × 2] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
+#>  $ icd_desc: tibble [14,337 × 2] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
+#>  $ vocab   : tibble [2,306 × 3] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
+#>  $ tac_long: tibble [477,252 × 6] (S3: tbl_df/tbl/data.frame)
+#>  $ dcd_long: tibble [44,280 × 5] (S3: tbl_df/tbl/data.frame)
+#>  - attr(*, "class")= chr [1:2] "champs_data" "list"
+```
+
+These data frames map to the input csv files or to each other as follows:
+
+- `version`: represents the data in `CHAMPS_dataset_version.csv`
+- `dmg`: represents the data in `CHAMPS_deid_basic_demographics.csv`
+- `dcd`: represents the data in `CHAMPS_deid_decode_results.csv`
+- `lab`: represents the data in `CHAMPS_deid_lab_results.csv`
+- `tac`: represents the data in `CHAMPS_deid_tac_results.csv`
+- `va`: represents the data in `CHAMPS_deid_verbal_autopsy.csv`
+- `icd_map`: represents the data in `CHAMPS_ICD_Mappings.csv`
+- `icd_desc`: represents the data in `CHAMPS_icd10_descriptions.csv`
+- `vocab`: represents the data in `CHAMPS_vocabulary.csv`
+- `tac_long`: a long-form representation of data in `tac`
+- `dcd_long`: a long-form representation of data in `dcd`
+
+The row and column counts may differ depending on the version of the dataset you are working with.
+
+You can access each of these tables for further inspection or use in specific analyses with `d$dmg`, `d$dcd`, etc.
+
+The object containing all of the tables, which here we named `d`, will be used as the primary argument to all of the computation functions, as described in [this article](usage.html).
+
+It is highly recommended that new users to CHAMPS data thoroughly read the dataset description that comes with the downloaded data to get a better understanding of what these different tables mean. We also recommend reading the [Intro to CHAMPS data](data_intro.html) article. 
+
+# `load_data()` details
+
+The remainder of this article provides details about all of the processing and transformations that occur when calling `load_data()`.
+
+At a high level, `load_data()` makes the following changes to the data as it reads in the csv files:
+
+- All variables names are converted to "snake case" (all lower case with special characters and spaces replaced with `_`).
+- The verbal autopsy data has two columns that are timestamps without dates (e.g. HH:MM:SS) but `readr::read_csv()` defaults to reading them in as dates and has difficulty parsing them. We have processed them as characters.
+- The demographics data has a few changes:
+    - Four columns have been added: `site`, `pmi_range`, `acquired24`, `acquired48`.
+    - Three columns are transformed to factors: `age_group`, `age_subgroup`, and `site` (see description below).
+- Two Long Format tables are created from the TAC and DeCoDe tables (see description below).
+
+## CHAMPS_deid_basic_demographics (dmg)
+
+### New demographic variables
+
+The demographic data provides ISO country site codes. We add a `site` variable built from `site_iso_code` that is a factor with levels: Bangladesh, Kenya, Mali, Mozambique, South Africa, Ethiopia, Sierra Leone.
+
+We also add a categorical postmortem interval range (`pmi_range`) variable based on the `calc_postmortem_hrs` variable. `pmi_range` had nine levels - "0 to 3", "4 to 6", "7 to 9", "10 to 12", "13 to 15", "16 to 18", "19 to 21", "22 to 24", "Over 24h". 
+
+Finally, we add two new variables that represent if the case pathogens were acquired from the community or during during their hospital stay,`acquired24` and `acquired48`, depending on the length of hospitalization before death. If the location of death was in the community or death was in the first 24 hours of life or a hospital stay was less than 24 hours then `acquired24 = "Community"`. If the location of death was in the community or death was a stillbirth or in the first 24 hours or a hospital stay less than 48 hours yields `acquired48 = "Community"`. All other values in both variables were marked "Facility".
+
+### Demographic factors
+
+The demographic data has two age group variables - `age_group` and `age_group_subcat`. The `age_group` variable is converted to an ordered factor with factor levels following the natural order of age:
+
+```r
+levels(d$dmg$age_group)                                                         
+#> [1] "Stillbirth"                              
+#> [2] "Death in the first 24 hours"             
+#> [3] "Early Neonate (1 to 6 days)"             
+#> [4] "Late Neonate (7 to 27 days)"             
+#> [5] "Infant (28 days to less than 12 months)" 
+#> [6] "Child (12 months to less than 60 Months)"
+```
+
+The `age_group_subcat` variable provides a further partitioning of the "Infant" and "Early Neonate" categories as found in `age_group`.
+
+In the raw data, there are four values recorded for `age_group_subcat` which we converted to have descriptions that are similar to `age_group`.
+
+| Original     | New                                      |
+| ----         | ----                                     |
+| infant_>6M   | Infant (28 days to less than 6 months)   |
+| infant_6M    | Infant (6 months to less than 12 months) |
+| neonate_72h  | Early Neonate (24-72 hours)              |
+| neonate_>72h | Early Neonate (72+hrs to 6 days)         |
+
+All other values of `age_group_subcat` are missing in the raw data. We replace these missing values with the corresponding values provided in `age_group`. This gives us an updated `age_group_subcat` variable with the following levels:
+
+```r
+levels(d$dmg$age_group_subcat)                                                  
+#> [1] "Stillbirth"                              
+#> [2] "Death in the first 24 hours"             
+#> [3] "Early Neonate (24-72 hours)"             
+#> [4] "Early Neonate (72+hrs to 6 days)"        
+#> [5] "Late Neonate (7 to 27 days)"             
+#> [6] "Infant (28 days to less than 6 months)"  
+#> [7] "Infant (6 months to less than 12 months)"
+#> [8] "Child (12 months to less than 60 Months)"
+```
+
+## Long format tables
+
+The `tac_long` and `dcd_long` data frames are long-format transformed versions of the wide-formatted `tac` and `dcd` data frames with additional description columns added to clarify the coded column names.
+
+### tac_long
+
+The `tac` data frame provided in the raw data contains one row per case and one column per TAC assay result. There are 325 columns with names such as `bld_abau_1`, `bld_adev_1`, etc., indicating the specimen type and assay.
+
+```r
+d$tac                                                                           
+#> # A tibble: 1,473 x 325
+#>    champs_deid bld_abau_1 bld_adev_1 bld_bart_1 bld_bruc_1 bld_bups_1 bld_caal_1
+#>    <chr>       <chr>      <chr>      <chr>      <chr>      <chr>      <chr>     
+#>  1 AB032461-9… Negative   Negative   Negative   Negative   Negative   Negative  
+#>  2 46B7C6E7-2… Negative   Negative   Negative   Negative   Negative   Negative  
+#>  3 3791BBA8-4… Negative   Negative   Negative   Negative   Negative   Positive  
+#> # … with 1,470 more rows, and 318 more variables: bld_cchf_1 <chr>,
+```
+
+An alternate long-format representation of this data can be more convenient for various analyses. In the long format, we have one row for every case and TAC assay combination and columns providing information about the TAC assay, namely its `specimen_type`, `target`, `pathogen`, and the `result`.
+
+```r
+d$tac_long                                                                      
+#> # A tibble: 477,252 x 6
+#>    champs_deid           name    result  specimen_type target pathogen              
+#>    <chr>                 <chr>   <chr>   <chr>         <chr>  <chr>                 
+#>  1 AB032461-9D11-4391-A… bld_ab… Negati… Whole blood   ABAU_1 Acinetobacter baumann…
+#>  2 AB032461-9D11-4391-A… bld_ad… Negati… Whole blood   ADEV_1 Adenovirus            
+#>  3 AB032461-9D11-4391-A… bld_ba… Negati… Whole blood   BART_1 Bartonella spp.       
+#> # … with 477,249 more rows
+```
+
+Note that `specimen_type` is derived from the text preceding the first "_" in the original variable names. The `pathogen` value is found in a lookup table that is available in the dataset description PDF file that comes with the data download, and which is made available in this R package as a dataset `tac_table`.
+
+```r
+tac_table
+#> # A tibble: 128 x 3
+#>    code   assay                   gene_target     
+#>    <chr>  <chr>                   <chr>           
+#>  1 ABAU_1 Acinetobacter baumannii OXA-51          
+#>  2 ADEV_1 Adenovirus              hexon           
+#>  3 AD4X_1 Adenovirus 40/41        fiber protein   
+#> # … with 125 more rows
+```
+
+The `pathogen` variable is often much more useful for searching for specific TAC results, as you can search by a pathogen name (e.g. "Acinetobacter baumannii") rather than parsing out the TAC assay code (e.g. "ABAU_1").
+
+### dcd_long
+
+Similar to the TAC dataset, the DeCoDe dataset in its raw form has one row per case and many columns.
+
+```r
+d$dcd
+#> # A tibble: 1,476 x 66
+#>    champs_deid immediate_cod ic_champs_group… underlying_cause uc_champs_group…
+#>    <chr>       <chr>         <chr>            <chr>            <chr>           
+#>  1 B6F81D28-C… B24           Maternal HIV     P22.0            Neonatal preter…
+#>  2 56550401-2… P07.1         Neonatal preter… P36.1            Neonatal sepsis 
+#>  3 BA74FEEB-7… P20           Perinatal asphy… P36.8            Neonatal sepsis 
+#> # … with 1,473 more rows, and 61 more variables:
+#> #   main_maternal_disease_condition <chr>, morbid_condition_01 <chr>,
+#> #   morbid_cond_01_champs_group_desc <chr>, morbid_condition_02 <chr>,
+#> #   morbid_cond_02_champs_group_desc <chr>, morbid_condition_03 <chr>,
+#> #   morbid_cond_03_champs_group_desc <chr>, morbid_condition_04 <chr>,
+#> #   morbid_cond_04_champs_group_desc <chr>, morbid_condition_05 <chr>,
+#> #   morbid_cond_05_champs_group_desc <chr>, morbid_condition_06 <lgl>,
+#> #   morbid_cond_06_champs_group_desc <lgl>, morbid_condition_07 <lgl>,
+#> #   morbid_cond_07_champs_group_desc <lgl>, morbid_condition_08 <lgl>,
+#> #   morbid_cond_08_champs_group_desc <lgl>, other_maternal_condition_01 <chr>,
+#> #   other_maternal_condition_02 <chr>, other_maternal_condition_03 <chr>,
+#> #   other_maternal_condition_04 <chr>, other_significant_condition_01 <chr>,
+#> #   other_significant_condition_02 <chr>, other_significant_condition_03 <chr>,
+#> #   other_significant_condition_04 <chr>, other_significant_condition_05 <chr>,
+#> #   other_significant_condition_06 <chr>, other_significant_condition_07 <lgl>,
+#> #   other_significant_condition_08 <lgl>, other_significant_condition_09 <lgl>,
+#> #   other_significant_condition_10 <lgl>, immediate_cause_of_death_etiol1 <chr>,
+#> #   immediate_cause_of_death_etiol2 <chr>, immediate_cause_of_death_etiol3 <chr>,
+#> #   underlying_cause_factor_etiol1 <chr>, underlying_cause_factor_etiol2 <chr>,
+#> #   underlying_cause_factor_etiol3 <chr>, morbid_condition_01_etiol1 <chr>,
+#> #   morbid_condition_01_etiol2 <chr>, morbid_condition_01_etiol3 <chr>,
+#> #   morbid_condition_02_etiol1 <chr>, morbid_condition_02_etiol2 <chr>,
+#> #   morbid_condition_02_etiol3 <chr>, morbid_condition_03_etiol1 <chr>,
+#> #   morbid_condition_03_etiol2 <chr>, morbid_condition_03_etiol3 <chr>,
+#> #   morbid_condition_04_etiol1 <chr>, morbid_condition_04_etiol2 <lgl>,
+#> #   morbid_condition_04_etiol3 <lgl>, morbid_condition_05_etiol1 <chr>,
+#> #   morbid_condition_05_etiol2 <chr>, morbid_condition_05_etiol3 <chr>,
+#> #   morbid_condition_06_etiol1 <lgl>, morbid_condition_06_etiol2 <lgl>,
+#> #   morbid_condition_06_etiol3 <lgl>, morbid_condition_07_etiol1 <lgl>,
+#> #   morbid_condition_07_etiol2 <lgl>, morbid_condition_07_etiol3 <lgl>,
+#> #   morbid_condition_08_etiol1 <lgl>, morbid_condition_08_etiol2 <lgl>,
+#> #   morbid_condition_08_etiol3 <lgl>
+```
+
+For each case, information about the causes of death determined by the DeCoDe panel can be found. These are either available as CHAMPS group descriptions (ending with `_champs_group_desc`) and etiologies (ending with `_etiol`) if applicable. Immediate and underlying causes of death, along with morbid conditions or other significant conditions, are classified as ICD10 codes, CHAMPS group descriptions, and with etiologies depending on the causes. 
+
+Similar to what was done with the TAC long table, a long version of the DeCoDe table can be convenient for many analyses. We pivoted the data to long format such that there is one row per each etiology (1-3) and "type" of variable (immediate, underlying, morbid_condition_0*), with the corresponding CHAMPS group descriptions being repeated for each type.
+
+Let's take a glimpse at the data for one case in long form:
+
+```r
+dplyr::filter(d$dcd_long, champs_deid == d$dcd_long$champs_deid[1500]) 
+# A tibble: 30 x 5
+   champs_deid        champs_group_desc       type     etiol          etiol_num
+   <chr>              <chr>                   <chr>    <chr>              <int>
+ 1 FF205E2D-7F81-4A…  Neonatal sepsis         immedi…  Escherichia c…         1
+ 2 FF205E2D-7F81-4A…  Neonatal sepsis         immedi…  NA                     2
+ 3 FF205E2D-7F81-4A…  Neonatal sepsis         immedi…  NA                     3
+ 4 FF205E2D-7F81-4A…  Lower respiratory inf…  underl…  Escherichia c…         1
+ 5 FF205E2D-7F81-4A…  Lower respiratory inf…  underl…  NA                     2
+ 6 FF205E2D-7F81-4A…  Lower respiratory inf…  underl…  NA                     3
+ 7 FF205E2D-7F81-4A…  Meningitis/Encephalit…  morbid…  Escherichia c…         1
+ 8 FF205E2D-7F81-4A…  Meningitis/Encephalit…  morbid…  NA                     2
+ 9 FF205E2D-7F81-4A…  Meningitis/Encephalit…  morbid…  NA                     3
+10 FF205E2D-7F81-4A…  NA                      morbid…  NA                     1
+# … with 20 more rows
+```
+
+Here we see that this case has an immediate CHAMPS group description of "Neonatal sepsis" with an etiology of "Escherichia coli", and an underlying CHAMPS group description of "Lower respiratory infections". The long format provides us with a more convenient way to search for specific CHAMPS group descriptions or etiologies, in that we can search for a term in one column rather than across many columns.
+
+Note that for a given case and type, whenever a `champs_group_desc` and `etiol` are all `NA`, we omit that data.
+
+<!-- We have kept the `NA` values for the three `etiol` in the long format table for any `champs_group_desc` with a value. Users can filter to the `dcd_pivot` table to exclude all `etiol`'s that are `NA` but should be cautious to keep the first `etiol` whether or not it is `NA` for table calculations related to `champs_group desc` and `type`. -->
+
+## Table formats
+
+This package leverages many of the paradigms and packages of the [Tidyverse](https://www.tidyverse.org/). One of the most apparent elements involves the use of [tibbles](https://tibble.tidyverse.org/). They explain:
+
+> A tibble, or tbl_df, is a modern reimagining of the data.frame, keeping what time has proven to be effective, and throwing out what is not. Tibbles also have an enhanced print() method, which makes them easier to use with large datasets containing complex objects.
+
+If you are uncomfortable with the tibble print format, you can use the following code to convert all the objects to only data.frame.
+
+```r
+d <- lapply(d, data.frame)
+```

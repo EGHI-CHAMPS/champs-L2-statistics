@@ -1,0 +1,39 @@
+Package: champs
+Title: Load, Compute, and Display Statistics from CHAMPS L2 Data
+Version: 0.3.0
+Authors@R: c(
+    person("Ryan", "Hafen", email = "rhafen@prevagroup.com", role = c("cre", "aut")),
+    person("J", "Hathaway", email = "hathaway@datadriventeam.com", role = "aut"))
+Description: Provides utilities to read and transform CHAMPS L2 study data into convenient formats, as well as functions to compute several statistics of interest. Also includes some utilities for presenting these statistics in various formats such as plots and HTML tables.
+License: Apache License (>= 2.0)
+Encoding: UTF-8
+LazyData: true
+Depends: 
+    R (>= 3.5.0)
+Imports: 
+    dplyr,
+    tidyr,
+    forcats,
+    stats,
+    tidyselect,
+    htmlTable,
+    tibble,
+    ggplot2,
+    cowplot,
+    magrittr,
+    rlang,
+    formattable,
+    kableExtra,
+    ggfittext,
+    readr,
+    stringr,
+    ggforce
+RoxygenNote: 7.1.1
+Suggests: 
+    testthat,
+    knitr,
+    rmarkdown,
+    covr
+VignetteBuilder: knitr
+URL: https://github.com/EGHI-CHAMPS/champs-L2-statistics
+BugReports: https://github.com/EGHI-CHAMPS/champs-L2-statistics/issues

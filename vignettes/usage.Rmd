@@ -1,0 +1,446 @@
+---
+title: "Computing summaries"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Computing summaries}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  # eval = FALSE,
+  collapse = TRUE,
+  comment = "#>"
+)
+options(width = 95)
+hook_output <- knitr::knit_hooks$get("output")
+knitr::knit_hooks$set(output = function(x, options) {
+  lines <- options$output.lines
+  if (is.null(lines)) {
+    return(hook_output(x, options))  # pass to default hook
+  }
+  x <- unlist(strsplit(x, "\n"))
+  more <- "..."
+  if (length(lines) == 1) {        # first n lines
+    if (length(x) > lines) {
+      # truncate the output, but add ....
+      x <- c(head(x, lines), more)
+    }
+  } else {
+    x <- c(more, x[lines], more)
+  }
+  # paste these lines together
+  x <- paste(c(x, ""), collapse = "\n")
+  hook_output(x, options)
+})
+```
+
+# Setup
+
+As outlined in the ["loading data" article](data_load.html), the first step to calculating CHAMPS statistics is to load the R package and load the data. Suppose we have downloaded the csv files available in a directory `~/Downloads/CHAMPS_de_identified_data_2020-08-01`:
+
+```{r, echo=FALSE, message=FALSE}
+library(champs)
+```
+
+```r
+library(champs)
+d <- load_data("~/Downloads/CHAMPS_de_identified_data_2020-08-01")
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+d <- load_data("../_ignore/CHAMPS_de_identified_data")
+# d <- load_data("_ignore/CHAMPS_de_identified_data")
+```
+
+# Available parameters
+
+The functions outlined below are designed to be general, providing parameters for specifying different conditions, pathogens, sites, specimen types, TAC variables, and ICD10 codes.
+
+The selection and combination of these parameters will be dictated by the nature of the requested analysis, and will often require domain expertise to determing meaningful combinations.
+
+To see what valid values of different parameters are, a number of functions are provided.
+
+## Site
+
+All summary functions have a `site` parameter for which the user can specify which sites to include in the calculation. A list of valid sites found in the data can be listed by calling `valid_sites()`.
+
+```{r}
+valid_sites(d)
+```
+
+In all of the examples below, we are going to use the following 5 sites:
+
+```{r}
+sites <- c("Bangladesh", "Kenya", "Mali", "Mozambique", "South Africa")
+```
+
+## Condition
+
+A list of valid DeCoDe conditions can be listed by calling `valid_conditions()`. It returns a list of valid *etiologies* and valid *group descriptions*.
+
+```{r, output.lines=10}
+valid_conditions(d)$etiol
+```
+
+```{r, output.lines=10}
+valid_conditions(d)$champs_group_desc
+```
+
+While these are truncated for brevity, there are currently `length(valid_conditions(d)$etiol)` etiology conditions and `length(valid_conditions(d)$champs_group_desc)` group description conditions. We see "Streptococcus agalactiae" is listed as one of these conditions, and it is what we will check for in our Group B Streptococcus examples below.
+
+## Specimen type
+
+Often we want to tabulate results for specific sets of TAC specimen types. To get a list of these, we can call `valid_specimen_types()`.
+
+```{r}
+valid_specimen_types(d)
+```
+
+In our examples below, we will often compute statistics for all specimen types excluding nasopharyngeal and oropharyngeal swab, as well as all specimen types. We will specify these as `specimen_types1` and `specimen_types2`:
+
+```{r}
+specimen_types1 <- c(
+  "Cerebrospinal fluid sample",
+  "Tissue specimen from lung",
+  "Whole blood",
+  "Rectal swab",
+  "Plasma or spun blood specimen"
+)
+
+specimen_types2 <- c(
+  "Nasopharyngeal and Oropharyngeal swab",
+  "Cerebrospinal fluid sample",
+  "Tissue specimen from lung",
+  "Whole blood",
+  "Rectal swab",
+  "Plasma or spun blood specimen"
+)
+```
+
+## Pathogens
+
+For summaries that involve TAC results, we often want to specify a pathogen of interest. To see a list of valid pathogens, we can call `valid_pathogens()`.
+
+```{r, output.lines=10}
+valid_pathogens()
+```
+
+In all of our examples below, we will be using "Group B Streptococcus".
+
+## ICD10 codes
+
+Some calculations require a list of ICD10 codes, which are used to filter the DeCoDe results using the "Other Significant Condition" variables. For a list of ICD10 codes that exist in the CHAMPS data, we can call `valid_icds()`.
+
+```{r}
+valid_icds(d)
+```
+In our examples below, we will use ICD10 codes "P36.0", "A40.1", "P23.3", "G00.2".
+
+# Computing statistics
+
+## Condition in causal chain vs. all DeCoDed cases by site and age
+
+A common summary to compute is a tabulation of the number of cases of a given condition found in the causal chain by site and by age, within the context of all cases.
+
+A function, `calc_cc_allcases_by_site_age()` takes a condition and list of sites as input and produces this tabulation. For GBS and the sites specified above:
+
+```{r}
+calc_cc_allcases_by_site_age(d, condition = "Streptococcus agalactiae", sites = sites)
+```
+
+The output of this function is a list that contains the original input parameters as well as a table of the numerator statistics (number of GBS cases in the causal chain by age and site), and a table of the denominator statistics (number of DeCoDed cases by age and site).
+
+Note that currently only a single `condition` can be passed, although this could be expanded in the future to allow multiple conditions.
+
+## Condition in causal chain vs. TAC-detected by site and age
+
+A function, `calc_cc_detected_by_site_age()`, tabulates the number of cases of a given condition found in the causal chain by site and by age, within the context of cases where the pathogen(s) are detected in TAC results (dying from vs. dying with).
+
+This function takes the same parameters of `condition` and `site`, with an additional parameter `pathogen` which specifies what to look for in the TAC results tabulation. Also, a parameter `specimen_types` allows you to specify which TAC results to count.
+
+To compute these statistics for TAC results in blood, CSF, or lung (no NP only):
+
+```{r}
+calc_cc_detected_by_site_age(d,
+  condition = "Streptococcus agalactiae",
+  pathogen = "Group B Streptococcus",
+  sites = sites,
+  specimen_types = specimen_types1)
+```
+
+And for all specimen types:
+
+```{r}
+calc_cc_detected_by_site_age(d,
+  condition = "Streptococcus agalactiae",
+  pathogen = "Group B Streptococcus",
+  sites = sites,
+  specimen_types = specimen_types2)
+```
+
+Note that currently only a single `pathogen` can be passed, although this could be expanded in the future to allow multiple pathogens.
+
+## TAC-detected vs. all cases by site and age
+
+To tabulate the number of cases where a pathogen is detected in TAC results in the context of all cases by site and by age, we can use the function `calc_detected_allcases_by_site_age()`.
+
+This has the same arguments as `calc_cc_detected_by_site_age()` with an additional argument `tac_variable`, which is used to ensure the denominator (all cases) only includes those where the appropriate test had a valid positive or negative result.
+
+```{r echo=FALSE, eval=FALSE}
+library(dplyr)
+
+ids <- d$tac_pivot %>%
+  filter(pathogen == "Group B Streptococcus") %>%
+  pull(champs_deid) %>%
+  unique()
+
+# d$tac %>%
+#   select(champs_deid, bld_gbst_1) %>%
+#   filter(champs_deid %in% ids) %>%
+#   arrange(champs_deid)
+```
+
+To compute these statistics for TAC results in blood, CSF, or lung (no NP only):
+
+```{r}
+calc_detected_allcases_by_site_age(d,
+  condition = "Streptococcus agalactiae",
+  pathogen = "Group B Streptococcus",
+  sites = sites,
+  specimen_types = specimen_types1)
+```
+
+And for all specimen types:
+
+```{r}
+calc_detected_allcases_by_site_age(d,
+  condition = "Streptococcus agalactiae",
+  pathogen = "Group B Streptococcus",
+  sites = sites,
+  specimen_types = specimen_types2)
+```
+
+Note that to match the hand-computed outputs we have the target to match, the parameter `tac_variable` is actually not used. An open question is whether the code should be modified to use this variable.
+
+## Breakdown of TAC-positive cases by DeCoDe result by site or age
+
+To tabulate the number of cases where a pathogen is detected in TAC results by DeCoDe result (in causal chain or not, etc.) and by either site or age, we can use the function `calc_detected_by_decode()`.
+
+This function has a new parameter, `icds`, for which we can specify a list of ICD10 codes that will be used to count the number of cases where the condition of interest was not in the causal chain but was a contributing cause. Note that this function is limited as the use of `icds` to classify _Contributing (P2)_ only works for a few cases.
+
+To compute this breakdown by site, for TAC results in blood, CSF, or lung (no NP only):
+
+```{r}
+calc_detected_by_decode(d,
+  by = "site",
+  condition = "Streptococcus agalactiae",
+  pathogen = "Group B Streptococcus",
+  icds = c("P36.0", "A40.1", "P23.3", "G00.2"),
+  sites = sites,
+  specimen_types = specimen_types1)
+```
+
+To compute this breakdown by age, for TAC results in blood, CSF, or lung (no NP only):
+
+```{r}
+calc_detected_by_decode(d,
+  by = "age",
+  condition = "Streptococcus agalactiae",
+  pathogen = "Group B Streptococcus",
+  icds = c("P36.0", "A40.1", "P23.3", "G00.2"),
+  sites = sites,
+  specimen_types = specimen_types1)
+```
+
+Note that a dataset comes with the package, `infectious_causes`, which is used internally in this function to match against CHAMPS group descriptions to identify which cases fall into the "Other Infectious" category.
+
+```{r}
+champs::infectious_causes
+```
+
+Also note that cases in the "Contributing (P2)" category are found using the ICD10 codes provided to the function. There are only a small subset of pathogens that this categorization into "Contributing (P2)" can occur based only on ICD-10 codes, all others would need the ability to search in the free text field which is not part of the L2 dataset.
+
+## Top pathogens in causal chain
+
+Take cases filtered positive TAC for a pathogen but where the condition is not in the causal chain, but the cause of death is infectious, and then see what pathogens are there.
+
+```{r}
+calc_top_tac_pathogens(d,
+  condition = "Streptococcus agalactiae",
+  pathogen = "Group B Streptococcus",
+  icds = c("P36.0", "A40.1", "P23.3", "G00.2"),
+  sites = sites,
+  specimen_types = specimen_types2)
+```
+
+## Postmortem interval by specimen type and site
+
+To calculate the average postmortem interval (PMI - average time from death to MITS in hours) by specimen type of NP Only vs. Blood/CSF/Lung and by site, we can use the function `calc_pmi_by_specimen_site()`.
+
+Here, instead of displaying the raw results, which provide sums of hours for the numerator, and number of observations for the denominator, it is more interesting to look at the average time in hours, which is the numerator divided by the denominator.
+
+```{r}
+res <- calc_pmi_by_specimen_site(d,
+  pathogen = "Group B Streptococcus",
+  sites = sites)
+
+round(res$numerator / res$denominator, 1)
+```
+
+## Postmortem interval by DeCoDe result and site
+
+To calculate the average PMI by DeCoDe result and site, we can use the function `calc_pmi_by_decode_site()`.
+
+```{r}
+res <- calc_pmi_by_decode_site(d,
+  condition = "Streptococcus agalactiae",
+  pathogen = "Group B Streptococcus",
+  icds = c("P36.0", "A40.1", "P23.3", "G00.2"),
+  specimen_types = specimen_types2,
+  sites = sites)
+
+round(res$numerator / res$denominator, 1)
+```
+
+## Postmortem interval by age and DeCoDe result
+
+To calculate the average PMI by age and DeCoDe result, we can use the function `calc_pmi_by_age_decode()`.
+
+```{r}
+res <- calc_pmi_by_age_decode(d,
+  condition = "Streptococcus agalactiae",
+  pathogen = "Group B Streptococcus",
+  icds = c("P36.0", "A40.1", "P23.3", "G00.2"),
+  specimen_types = specimen_types1,
+  sites = sites)
+
+round(res$numerator / res$denominator, 1)
+```
+
+## Postmortem interval range by number of specimens
+
+To tabulate the number of positive specimens for each case where the pathogen of interest is detected in the TAC results by postmortem interval range, we can use the function `calc_nspecimen_by_pmi()`.
+
+For GBS:
+
+```{r}
+calc_nspecimen_by_pmi(d,
+  pathogen = "Group B Streptococcus",
+  sites = sites
+)
+```
+
+Note that to match the hand-calculated results provided as a target, we need to calculate the results for all sites as opposed to the 5 sites we have specified here.
+
+For Klebsiella pneumoniae:
+
+```{r}
+calc_nspecimen_by_pmi(d,
+  pathogen = "Klebsiella pneumoniae",
+  sites = sites
+)
+```
+
+For Escherichia coli/Shigella:
+
+```{r}
+calc_nspecimen_by_pmi(d,
+  pathogen = "Escherichia coli/Shigella",
+  sites = sites
+)
+```
+
+## Top pathogens in causal chain by site of acquisition
+
+To calculate the top pathogens and the associated number of cases by site of acquisition, we can use `calc_top_dcd_pathogens_by_acq()`.  In this function, we can specify the condition and the age groups we want to include in the calculation.
+
+For example, to calculate the top pathogens associated with lower respiratory infection deaths for ages 1-59mo:
+
+```{r}
+calc_top_dcd_pathogens_by_acq(d,
+  condition = "Lower respiratory infections",
+  age_groups = c(
+    "Infant (28 days to less than 12 months)",
+    "Child (12 months to less than 60 Months)")
+)
+```
+
+## TAC top pathogens detected by condition in causal chain
+
+```{r}
+calc_top_tac_pathogens_cc(d,
+  condition = "Lower respiratory infections",
+  age_groups = c(
+    "Infant (28 days to less than 12 months)",
+    "Child (12 months to less than 60 Months)"),
+  specimen_types = c(
+    "Nasopharyngeal and Oropharyngeal swab",
+    "Tissue specimen from lung"),
+  specimen_abbrv = c("# NP+", "# Lung+")
+)
+```
+
+## Tabulate top etiologies by specified age groups
+
+```{r}
+calc_top_etiol_by_age(d,
+  age_groups = c(
+    "Death in the first 24 hours",
+    "Early Neonate (24-72 hours)",
+    "Early Neonate (72+hrs to 6 days)",
+    "Late Neonate (7 to 27 days)")
+)
+```
+
+## Cases with condition in causal chain by age and site of acquisition
+
+```{r}
+calc_cc_allcases_by_age_acq(d,
+  condition = "Klebsiella pneumoniae",
+  age_groups = valid_age_subcats(d)
+)
+```
+
+## Tabulate syndrome combinations for a specified condition (etiology)
+
+```{r}
+calc_syndrome_combinations(d,
+  condition = "Streptococcus pneumoniae",
+  syndrome_names = c(
+    "Lower respiratory infections",
+    "Meningitis/Encephalitis",
+    "Neonatal sepsis",
+    "Congenital infection"),
+  syndrome_values = c(
+    "Pneumonia",
+    "Meningitis",
+    "Sepsis",
+    "Sepsis"),
+  specimen_types = c(
+    "Cerebrospinal fluid sample",
+    "Tissue specimen from lung",
+    "Whole blood")
+)
+```
+
+## Tabulate cases for a condition (etiology) by age and syndrome
+
+```{r}
+calc_cc_by_age_syndrome(d,
+  condition = "Streptococcus pneumoniae",
+  syndrome_names = c(
+    "Lower respiratory infections",
+    "Meningitis/Encephalitis",
+    "Neonatal sepsis",
+    "Congenital infection"),
+  syndrome_values = c(
+    "Pneumonia",
+    "Meningitis",
+    "Sepsis",
+    "Sepsis")
+)
+```
+
+In the [next article](plots_tables.html), we will show how the results of some of these calculations can be transformed into outputs such as tables and plots.

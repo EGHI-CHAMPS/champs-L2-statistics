@@ -1,0 +1,13 @@
+pandoc: 2.2.3.2
+pkgdown: 1.6.1
+pkgdown_sha: ~
+articles:
+  calc_deepdive: calc_deepdive.html
+  custom_analyses_h_influenzae: custom_analyses_h_influenzae.html
+  data_intro: data_intro.html
+  data_load: data_load.html
+  download: download.html
+  plots_tables: plots_tables.html
+  usage: usage.html
+last_built: 2020-09-16T23:20Z
+

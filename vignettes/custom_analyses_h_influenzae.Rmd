@@ -1,0 +1,253 @@
+---
+title: "Deep dive custom analysis"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Deep dive custom analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(dplyr)
+library(stringr)
+library(champs)
+d <- load_data("../_ignore/CHAMPS_de_identified_data")
+# d <- load_data("_ignore/CHAMPS_de_identified_data")
+```
+
+This article provides an example of a custom analysis that an analyst might need to carry out at the request of a researcher.
+
+## Researcher request
+
+We want __to determine the proportion of cases where Haemophilus influenzae type B is in the causal chain of death__. The CHAMPS TAC assays data for _H. influenzae_ includes a target found in all serotypes (`HIAT_1` or "Haemophilus influenzae") as well as a target found in serotypes A and B (`HITB_2` or "Haemophilus influenzae type B"). The combination of Negative and Positive results result in the following interpretation;
+
+| **HIAT_1** | **HITB_2** | **Interpretation**                          |
+| ---------- | ---------- | ------------------------------------------- |
+| Positive   | Negative   | *H. influenzae* serotype A,B,C,D,E,F, or NT |
+| Positive   | Positive   | *H. influenzae* serotype A or B             |
+| Negative   | Positive   | *H. influenzae* serotype A or B             |
+| Negative   | Negative   | Negative for *H. influenzae*                |
+
+The DeCoDe panel determines each case's causal result in the `dcd` data, and they cannot wholly rule-out *H. influenzae type A* even if the *H. influenzae type B* test result is positive. Because of this, they will record the case as *H. influenzae* without specifying type B (HiB). We want to use the CHAMPS data to estimate the count of cases that may be true HiB by finding the cases where *H. influenzae* is an etiology in the causal chain (`dcd`), and any positive result for `HITB_2` is in any specimen (`tac`).
+
+## Using CHAMPS data with the champs package
+
+```r
+library(champs)
+library(dplyr)
+library(stringr)
+d <- load_data("CHAMPS_de_identified_data")
+```
+
+Let's use the `tac_long` data to make sure we understand the target in the test and which specimen types exist for _influenzae_.
+
+```{r}
+d$tac_long %>%
+  filter(!duplicated(name), str_detect(name, "hiat|hitb")) %>%
+  select(-champs_deid, -result) %>%
+  arrange(target) %>%
+  knitr::kable(format = "markdown")
+```
+
+Are there any other pathogen names that we may be missing that are _influenzea_?
+
+```{r}
+d$tac_long %>%
+  filter(!duplicated(name), str_detect(pathogen, "influenzae")) %>%
+  select(-champs_deid, -result) %>%
+  arrange(target) %>%
+  knitr::kable(format = "markdown")
+```
+
+The _H. influenza_ in the `HFLU_1` is a 'multi-target pattern' defined by the positive-negative table in the researcher request section above. In other words, `HIAT_1` and `HITB_2` explain `HFLU_1`, so we don't need to track that target.
+
+### Building pathogen present (TAC) tabulations
+
+We can build our present pathogen counts and ensure that our totals align with our `tac` subject count of `r nrow(d$tac)`. From the table below, it looks like our counts total the correct amount. We are not interested in the double negative results, but the other three rows are of interest.
+
+```{r}
+hiat_1_positive <- d$tac_long %>%
+  filter(result == "Positive", pathogen == "Haemophilus influenzae") %>%
+  pull(champs_deid) %>%
+  unique()
+
+hitb_2_positive <- d$tac_long %>%
+  filter(result == "Positive", pathogen == "Haemophilus influenzae type B") %>%
+  pull(champs_deid) %>%
+  unique()
+
+# table tallies from TAC
+positive_hiat_1_negative_hitb_2 <-  hiat_1_positive[!hiat_1_positive %in% hitb_2_positive]
+positive_both <- hiat_1_positive[hiat_1_positive %in% hitb_2_positive]
+negative_hiat_1_positive_hitb_2 <- hitb_2_positive[!hitb_2_positive %in% hiat_1_positive]
+negative_both <- unique(d$tac_long$champs_deid)[!unique(d$tac_long$champs_deid) %in% 
+  c(positive_hiat_1_negative_hitb_2 , positive_both, negative_hiat_1_positive_hitb_2)]
+```
+
+| **HIAT_1** | **HITB_2** | **Interpretation**                          | **Pathogen present (tac)**                |
+| ---------- | ---------- | ------------------------------------------- | ----------------------------- |
+| Positive   | Negative   | *H. influenzae* serotype A,B,C,D,E,F, or NT | `r length(positive_hiat_1_negative_hitb_2)`   |
+| Positive   | Positive   | *H. influenzae* serotype A or B             | `r length(positive_both)`     |
+| Negative   | Positive   | *H. influenzae* serotype A or B             | `r length(negative_hiat_1_positive_hitb_2)`   |
+| Negative   | Negative   | Negative for *H. influenzae*                | `r length(negative_both)`     |
+| **Total**  |            |                                             | `r length(c(negative_both, negative_hiat_1_positive_hitb_2, positive_both, positive_hiat_1_negative_hitb_2))`     |
+
+### Building causal chain (DeCoDe) tabulations
+
+Let's look for the unique values in `champs_group_desc` and `etiol` from `dcd_long` related to _influenzae_. From the table below, we can see our two variables of interest under `eitol`.  There appear to be 36 unique cases classified as having _Haemophilus influenzae_ in their causal chain. We have no cases classified as _Haemophilus influenzae Type B_ and we are not interested in _Haemophilus parainfluenzae_ for this analysis.
+
+```{r}
+d$dcd_long %>%
+  filter(str_detect(etiol, "influenzae")) %>%
+  arrange(champs_deid) %>%
+  group_by(etiol) %>%
+  summarize(values = n(), unique_cases = length(unique(champs_deid)), 
+    types = str_c(unique(type), collapse = ", "), cgd_count = length(unique(champs_group_desc))) %>%
+  knitr::kable(format = "markdown")
+```
+
+Sometimes the capitalization and labeling are different from the `tac_long` pathogens as compared to the `dcd_long` values in `etiol`.  It is essential to take note of any potential differences. Also, as the DeCoDe data has immediate and underlying causes, we may not have 36 unique cases with the `etiols` selected. The champs package includes a `valid_conditions()` function that can recreate the above code.  It will check the `champs_group_description` as well.
+
+```{r}
+lapply(valid_conditions(d), function(x) str_subset(x, "(i|I)nfluenzae"))
+```
+
+In our specific case, there are no causal cases with 'Haemophilus influenzae' and 'Haemophilus influenzae Type B'.  We can find the 36 cases with _Haemophilus influenzae_.
+
+```{r}
+hi_causal <- d$dcd_long %>%
+  filter(etiol == "Haemophilus influenzae") %>%
+  pull(champs_deid) %>%
+  unique()
+
+hib_causal <- d$dcd_long %>%
+  filter(etiol == "Haemophilus influenzae Type B") %>%
+  pull(champs_deid) %>%
+  unique()
+```
+
+Running `length(hi_causal)` returns `r length(hi_causal)` values while `length(hib_causal)` returns `r length(hib_causal)` values. 
+
+### Exploring the `r length(hi_causal)` 'Haemophilus influenzae' causal cases
+
+We want to examine the `r length(hi_causal)` cases determined to have _Haemophilus influenzae_ to see if any of those cases are potential Type B.  We will examine the cases with our pathogens of interest from `tac_long` that we calculated above to see alignment with the DeCoDe causal classification.
+
+```{r}
+hi_causal_phi_nhib <- positive_hiat_1_negative_hitb_2[positive_hiat_1_negative_hitb_2 %in% hi_causal]
+length(hi_causal_phi_nhib)
+```
+
+So we had `r length(hi_causal_phi_nhib)` of the causal _Haemophilus influenzae_ cases out of the `r length(hi_causal)` that had a positive `HIAT_1` and a negative `HITB_2` in their TAC.  One case appears to have a positive `HITB_2`.  We can check;
+
+```{r}
+hi_causal_pboth <- positive_both[positive_both %in% hi_causal]
+length(hi_causal_pboth)
+```
+
+Here is the reported DeCoDe information for the one case that is _Haemophilus influenzae_ causal and positive for both `HIAT_1` and `HITB_2`. We stored the `champs_deid` in the object `hi_causal_pboth`.
+
+```{r}
+d$dcd_long %>% 
+  filter(champs_deid %in% hi_causal_pboth, !is.na(champs_group_desc)) %>% 
+  select(-champs_deid) %>%
+  knitr::kable(format = "markdown")
+```
+
+That same case's TAC data filtered to  `pathogen`'s containing _influenzae_ is shown below.
+
+```{r}
+d$tac_long %>% 
+  filter(champs_deid %in% hi_causal_pboth, result == "Positive", str_detect(pathogen, "influenzae")) %>% 
+  select(-champs_deid) %>%
+  knitr::kable(format = "markdown")
+```
+
+### Exploring the 9 `HIAT_1` and `HITB_2` positve cases
+
+We discussed one of the nine cases in the previous section. What did the other 8 cases with positive `HIAT_1` and `HITB_2` have in their casual chain?  
+
+For convenience, to remove the long `champs_deid`, we will define a function that replaces the ID with a unique numeric label, which we will use in several of the following code blocks.
+
+```{r}
+recode_champs_deid <- function(x) {
+  x %>%
+    mutate(champs_case = factor(champs_deid) %>% as.numeric()) %>%
+    select(-champs_deid) %>%
+    select(champs_case, everything()) %>%
+    arrange(champs_case)
+}
+```
+
+We can find the dual positive TAC with no _Haemophilus influenzae_ in the causal chain with an `etiol` reported (`tac_pboth_nhic`) and then look at the DeCoDe results.
+
+```{r}
+tac_pboth_nhic <- d$dcd_long %>%
+  filter(champs_deid %in% positive_both, !is.na(etiol)) %>%
+  pull(champs_deid) %>% unique()
+
+d$dcd_long %>%
+  filter(champs_deid %in% tac_pboth_nhic, !is.na(etiol))%>%
+  filter(champs_deid != hi_causal_pboth) %>%
+  recode_champs_deid() %>%
+  knitr::kable(format = "markdown")
+```
+
+Notice that there are only 7 cases in the TAC data table shown above. We expected to have eight cases after removing the one case in `hi_causal_pboth`. Let's look at the missing case and see why it is not in our above table.
+
+```{r}
+d$dcd_long %>%
+  filter(champs_deid %in% positive_both[!positive_both %in% tac_pboth_nhic], !is.na(champs_group_desc)) %>%
+  recode_champs_deid() %>%
+  knitr::kable(format = "markdown")
+```
+
+This could be a potential _Haemophilus influenzae Type B_ causal case based on the double-positive in the TAC data for `HIAT_1` and `HITB_2` and the DeCoDe board's non-determination. Finally, we have two cases that we could recommend for inclusion in the _Haemophilus influenzae Type B_ causal group.
+
+One other important note is that the `champs_group_desc` had the pertinent information needed to determine the causal description for this case and that the respective `etiol` was `NA`.  We need to be careful filtering out missing values in `etiol`, which is what we did in the table of seven cases.
+
+
+## Checking our counts with `calc_` functions
+
+Our calculations above were not broken down by site or age, but we can use the validated `calc_` functions to check our results using the marginal totals. 
+
+### Pathogen presence of 'Haemophilus influenzae'
+
+We reported `r length(positive_hiat_1_negative_hitb_2) + length(positive_both)` cases and can check those values against the `calc_cc_detected_by_site_age()`
+
+```{r}
+calc_detected_HIAT_1_wc_hi <- calc_cc_detected_by_site_age(d, 
+  condition = "Haemophilus influenzae", 
+  pathogen = "Haemophilus influenzae",
+  specimen_types = valid_specimen_types(d),
+  sites = valid_sites(d))
+calc_detected_HIAT_1_wc_hi$denominator %>% knitr::kable(format = "markdown")
+```
+
+### Pathogen presence of 'Haemophilus influenzae type B'
+
+We reported `r length(positive_both) + length(negative_hiat_1_positive_hitb_2)` cases.  We can see that marginal total below.
+
+```{r}
+calc_detected_HITB_2_wc_hib <- calc_cc_detected_by_site_age(d, 
+  condition = "Haemophilus influenzae", 
+  pathogen = "Haemophilus influenzae type B",
+  specimen_types = valid_specimen_types(d),
+  sites = valid_sites(d))
+calc_detected_HITB_2_wc_hib$denominator %>% knitr::kable(format = "markdown")
+```
+
+#### Causal presence of 'Haemophilus influenzae' 
+
+We reported `r length(hi_causal)` cases and can see that value in the marginal totals.
+
+```{r}
+calc_causal_hi_only <- calc_cc_allcases_by_site_age(d, condition = "Haemophilus influenzae", sites = valid_sites(d))
+calc_causal_hi_only$numerator %>% knitr::kable(format = "markdown")
+```

@@ -1,0 +1,17 @@
+^data-raw$
+^LICENSE\.md$
+^_ignore$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^champs\.code-workspace$
+^\.lintr$
+^vignettes$
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.travis\.yml$
+^codecov\.yml$
+^doc$
+^Meta$
+^\.github$
+^index\.md$

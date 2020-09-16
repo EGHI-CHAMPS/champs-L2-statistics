@@ -1,0 +1,187 @@
+---
+title: "Plots and tables"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Plots and tables}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(champs)
+library(tidyverse)
+d <- load_data("../_ignore/CHAMPS_de_identified_data/")
+# d <- load_data("_ignore/CHAMPS_de_identified_data/")
+```
+
+The champs package comes with a few plot and html table functions to help present the output of some of the `calc_` functions.
+
+```r
+library(champs)
+library(tidyverse)
+d <- load_data("CHAMPS_de_identified_data")
+```
+
+## Plot functions
+
+Plot methods only exist for a subset of `calc_` functions. Currently, the following are implemented:
+
+- `plot_syndrome_combinations()` which works with the output from `calc_syndrome_combinations()`
+- `plot_top_etiol_by_age()` which works with the output from `calc_top_etiol_by_age()`
+- `plot_margins_site_age()` which works with the output from `calc_cc_allcases_by_site_age()`, ` calc_detected_allcases_by_site_age()`, and `calc_cc_detected_by_site_age()`.
+- `heatmap_site_age()` which works with the same `calc_` functions as `plot_margins_site_age()`.
+
+### Plot syndrome combinations for a specified condition
+
+```{r}
+d_syndrome <- calc_syndrome_combinations(d,
+  condition = "Streptococcus pneumoniae",
+  syndrome_names = c(
+    "Lower respiratory infections",
+    "Meningitis/Encephalitis",
+    "Neonatal sepsis",
+    "Congenital infection"),
+  syndrome_values = c(
+    "Pneumonia",
+    "Meningitis",
+    "Sepsis",
+    "Sepsis"),
+  specimen_types <- c(
+    "Cerebrospinal fluid sample",
+    "Tissue specimen from lung",
+    "Whole blood")
+)
+
+plot_syndrome_combinations(d_syndrome, legend_location = "none", 
+  plot_type = "bar", include_text = "full_percent")
+
+plot_syndrome_combinations(d_syndrome, legend_location = "bottom", 
+  include_text = "percent")
+
+plot_syndrome_combinations(d_syndrome, "age_breakdown", legend_location = "bottom", 
+include_text = "number")
+
+plot_syndrome_combinations(d_syndrome, "tac_age_breakdown", 
+  legend_location = "none", include_text = "full_number")
+
+plot_syndrome_combinations(d_syndrome, "age_breakdown", legend_location = "bottom", 
+  include_text = "percent", full_separator = ",")
+
+plot_syndrome_combinations(d_syndrome, "age_breakdown", plot_type = "pie", 
+  legend_location = "left", include_text = "number", full_separator = ",")
+
+plot_syndrome_combinations(d_syndrome, "tac_age_breakdown", plot_type = "bar", 
+  legend_location = "none", include_text = "full_number", full_separator = "\n")  
+```
+
+### Plot top etiologies by specified age groups
+
+```{r}
+d_top_etiol_by_age <- calc_top_etiol_by_age(d, age_groups = c(
+  "Death in the first 24 hours",
+  "Early Neonate (24-72 hours)",
+  "Early Neonate (72+hrs to 6 days)",
+  "Late Neonate (7 to 27 days)"))
+
+plot_top_etiol_by_age(d_top_etiol_by_age)
+```
+
+### Plot margins by site and age
+
+The `plot_margins()` function works with all the `calc_` functions that create numerator and denominator tables with age group and site tabulations.
+
+```{r,fig.width=10}
+specimen_types <- c(
+  "Cerebrospinal fluid sample",
+  "Tissue specimen from lung",
+  "Whole blood",
+  "Rectal swab",
+  "Plasma or spun blood specimen")
+
+d_dcd <- calc_cc_allcases_by_site_age(d, condition =  "Streptococcus agalactiae")
+d_tac <- calc_detected_allcases_by_site_age(d, condition =  "Streptococcus agalactiae", pathogen = "Group B Streptococcus")
+d_both <- calc_cc_detected_by_site_age(d,
+  condition = "Streptococcus agalactiae",
+  pathogen = "Group B Streptococcus",
+  specimen_types = specimen_types)
+
+plot_margins_site_age(d_tac, include_x_label = FALSE, include_text = "full_fraction",
+  plot_title = "TAC Marginal Distributions for Streptococcus agalactiae")
+
+plot_margins_site_age(d_dcd, include_x_label = TRUE, include_text = "fraction",
+  plot_title = "DeCoDe Marginal Distribution for Streptococcus agalactiae")             
+
+plot_margins_site_age(d_both, include_x_label = FALSE, include_text = "full_fraction",
+  plot_title = "DeCoDe Streptococcus agalactiae where TAC contains Streptococcus agalactiae")
+
+plot_margins_site_age(d_tac, include_x_label = FALSE, include_text = "full_percent", 
+  plot_title = "TAC marginal distributions for Streptococcus agalactiae")
+
+plot_margins_site_age(d_tac, include_x_label = FALSE, include_text = "name",
+  plot_title = "TAC Marginal Distributions for Streptococcus agalactiae")
+
+plot_margins_site_age(d_dcd, include_x_label = FALSE, include_text = "full_fraction",
+  plot_title = "DeCoDe Marginal Distribution for Streptococcus agalactiae")
+             
+plot_margins_site_age(d_dcd, include_x_label = TRUE, include_text = "fraction",
+  plot_title = "DeCoDe Marginal Distribution for Streptococcus agalactiae")             
+```
+
+### Plot table percentages heatmap
+
+The `heatmap_site_age()` function works with all the `calc_` functions that create numerator and denominator tables using the age group and site tabulations. A visualized table where each cell is colored by the percentage based on the numerator and denominator tables from the `calc_` functions is output.
+
+```{r}
+heatmap_site_age(d_tac, include_text = "percent",
+  plot_title = "TAC Results", plot_subtitle = "Streptococcus agalactiae")
+
+heatmap_site_age(d_dcd, include_text = "fraction",
+  plot_title = "DeCoDe results", plot_subtitle = "Streptococcus agalactiae")             
+
+heatmap_site_age(d_both, include_text = "fraction",
+  plot_title = "DeCoDe Streptococcus agalactiae where TAC contains Streptococcus agalactiae")
+```
+
+### Plot function details
+
+The plot functions are built using [ggplot2](https://ggplot2.tidyverse.org/) from the [tidyverse](https://www.tidyverse.org/). They leverage three ggplot2 extension packages to improve the labeling of the pie and bar charts.
+
+- [ggforce](https://ggforce.data-imaginist.com/) provides access to `geom_arc_bar()` for improved pie charts.
+- [ggfittext](https://wilkox.org/ggfittext/) provides improved automatic labeling in bar charts.
+- [cowplot](https://wilkelab.org/cowplot/articles/plot_grid.html) provides dual plot view for the marginal plots.
+
+The plotting outputs are not intended to be highly customizable, but you can modify much of the output with additional `ggplot2` commands. 
+
+## Table functions
+
+The `html_table_site_age()` function works on `calc_cc_allcases_by_site_age()`, `calc_detected_allcases_by_site_age()`, and `calc_cc_detected_by_site_age()` tabulations. 
+
+```{r}
+html_table_site_age(d_dcd)
+
+html_table_site_age(d_dcd, margin_denom = TRUE)
+
+html_table_site_age(d_dcd, margin_denom = TRUE, inside_pct = TRUE)
+
+html_table_site_age(d_dcd, margin_denom = TRUE, inside_denom = TRUE)
+```
+
+```r
+head(mock$dmg)
+#>   champs_deid site_iso_code site  age_group age_group_subcat location_of_dea…
+#>   <chr>       <chr>         <chr> <fct>     <fct>            <chr>           
+#> 1 HH23B       V             Vbrgm Early Ne… Early Neonate (… facility        
+#> 2 SA73Z       G             Gtmpo Early Ne… Early Neonate (… facility        
+#> 3 HS54M       W             Wdurc Death in… Death in the fi… facility        
+#> 4 KL97A       N             Nugtw Stillbir… Stillbirth       facility        
+#> 5 QA17R       W             Wdurc Early Ne… Early Neonate (… facility        
+#> 6 ME83B       W             Wdurc Stillbir… Stillbirth       facility        
+#> # … with 12 more variables: hosp_los_24h <dbl>, hosp_los_48h <dbl>,
+```

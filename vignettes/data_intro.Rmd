@@ -1,0 +1,62 @@
+---
+title: "CHAMPS Introduction"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{CHAMPS Introduction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+When working with CHAMPS mortality data, it is important to understand what data is collected and how it is collected. A detailed reference for this can be found in the [CHAMPS Mortality Surveillance Protocol](https://champshealth.org/wp-content/uploads/2017/09/CHAMPS-Mortality-Surveillance-Protocol-v1.3.pdf).
+
+# Background
+
+At a high level, CHAMPS data consists of several modes of data capture of information about deaths in children at several sites. These data include basic demographics, laboratory, histopathology, abstracted clinical records (for the child, and if applicable, also for the mother), and verbal autopsy findings for each case. The laboratory and histopathology data is collected postmortem through a minimally invasive tissue sampling (MITS) procedure and evaluation by molecular, microbiological and histology evaluation of the specimens. Finally, a [Determination of Cause of Death (DeCoDe)](https://academic.oup.com/cid/article/69/Supplement_4/S333/5584383) panel composed of experts from a local CHAMPS site analyzes all of this information to determine the underlying cause (event that precipitated the fatal sequence of events) and other antecedent, immediate, and maternal causes of death. These data are stored in several tables and documents.
+
+# Working with data
+
+This R package is built to support what is called "Level 2"  CHAMPS data, also known as "L2" or "de-identified" data. With L2 data, identifiers of the individual are removed such that the information could not be used alone or in combination with other information to identify an individual who is the subject of the information.
+
+To learn how to access this dataset, please see the [downloading CHAMPS data](download.html) article.
+
+As mentioned, many tables come with the CHAMPS dataset download. All computations in this package and in the supporting tutorials focus on information found in the following three tables.
+
+- `CHAMPS_deid_basic_demographics.csv`: basic demographics for each CHAMPS case
+- `CHAMPS_deid_decode_results.csv`: contains the Determination of Cause of Death (DeCoDe) results
+- `CHAMPS_deid_tac_results.csv`: contains TaqMan Array Card (TAC) results for each assay/specimen type combination available on CHAMPS TAC cards
+
+Additional tables that come with the data are the following:
+
+- `CHAMPS_dataset_version.csv`
+- `CHAMPS_deid_lab_results.csv`
+- `CHAMPS_deid_verbal_autopsy.csv`
+- `CHAMPS_ICD_Mappings.csv`
+- `CHAMPS_icd10_descriptions.csv`
+- `CHAMPS_vocabulary.csv`
+
+A dataset description PDF file comes with the data that provides a great deal of background about the data found in these tables.
+
+# Resources
+
+The simple tabular form that the tables come in may be deceiving, as it may appear that any analysis would be comprised of simple tabulations of the tables. However, there are nuances about the different sources of data and how they interact require complex filtering and joining of different sources to get to the desired result. This package and these articles provide resources to help an analyst who is new to this data learn some of these nuances.
+
+## Data structure
+
+For a better understanding of data structures and what is found in the data, please see the article on [loading CHAMPS data](data_load.html).
+
+## Functions to perform specific calculations
+
+This package contains several calculation functions, all of which begin with `calc_`, that perform pre-defined calculations of interest. These can be used by an analyst who has domain background but might lack a deep knowledge of CHAMPS data or intermediate data manipulation techniques in R. An article about these functions can be found [here](usage.html).
+
+[Another article](calc_deepdive.html) provides a deep dive into one of the `calc_` functions to discuss how to go about making the calculation manually.
+
+## A custom analysis example
+
+For an example of using CHAMPS data to answer a specific analysis question not covered in the provided `calc_` functions, which involves more knowledge of the data and data manipulation, see [this article](custom_analyses_h_influenzae.html).
