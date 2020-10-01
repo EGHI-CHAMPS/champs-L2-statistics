@@ -210,8 +210,8 @@
 <h3 class="hasAnchor">
 <a href="#new-demographic-variables" class="anchor"></a>New demographic variables</h3>
 <p>The demographic data provides ISO country site codes. We add a <code>site</code> variable built from <code>site_iso_code</code> that is a factor with levels: Bangladesh, Kenya, Mali, Mozambique, South Africa, Ethiopia, Sierra Leone.</p>
-<p>We also add a categorical postmortem interval range (<code>pmi_range</code>) variable based on the <code>calc_postmortem_hrs</code> variable. <code>pmi_range</code> had nine levels - “0 to 3”, “4 to 6”, “7 to 9”, “10 to 12”, “13 to 15”, “16 to 18”, “19 to 21”, “22 to 24”, “Over 24h”.</p>
-<p>Finally, we add two new variables that represent if the case pathogens were acquired from the community or during during their hospital stay,<code>acquired24</code> and <code>acquired48</code>, depending on the length of hospitalization before death. If the location of death was in the community or death was in the first 24 hours of life or a hospital stay was less than 24 hours then <code>acquired24 = "Community"</code>. If the location of death was in the community or death was a stillbirth or in the first 24 hours or a hospital stay less than 48 hours yields <code>acquired48 = "Community"</code>. All other values in both variables were marked “Facility”.</p>
+<p>We also add a categorical postmortem interval range (<code>pmi_range</code>) variable based on the <code>calc_postmortem_hrs</code> variable. <code>pmi_range</code> had nine levels - “0 to 3”, “4 to 6”, “7 to 9”, “10 to 12”, “13 to 15”, “16 to 18”, “19 to 21”, “22 to 24”, “Over 24h”. This represents time between death and the MITS procedure and collection of specimens.</p>
+<p>Finally, we add two new variables that represent if the case pathogens were acquired from the community or during their hospital stay, <code>acquired24</code> and <code>acquired48</code>, depending on the length of hospitalization before death. If the location of death was in the community, or death was a stillbirth or in the first 24 hours of life or a hospital stay was less than 24 hours then <code>acquired24 = "Community"</code>. If the location of death was in the community or death was a stillbirth or in the first 24 hours or a hospital stay less than 48 hours yields <code>acquired48 = "Community"</code>. All other values in both variables were marked “Facility”. A limitation for this variable is that it only considers a hospitalization immediately preceding death and does not capture hospitalizations with a discharge prior to death.</p>
 </div>
 <div id="demographic-factors" class="section level3">
 <h3 class="hasAnchor">
@@ -236,11 +236,11 @@
 <tbody>
 <tr class="odd">
 <td>infant_&gt;6M</td>
-<td>Infant (28 days to less than 6 months)</td>
+<td>Infant (6 months to less than 12 months)</td>
 </tr>
 <tr class="even">
 <td>infant_6M</td>
-<td>Infant (6 months to less than 12 months)</td>
+<td>Infant (28 days to less than 6 months)</td>
 </tr>
 <tr class="odd">
 <td>neonate_72h</td>
@@ -255,12 +255,12 @@
 <p>All other values of <code>age_group_subcat</code> are missing in the raw data. We replace these missing values with the corresponding values provided in <code>age_group</code>. This gives us an updated <code>age_group_subcat</code> variable with the following levels:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit">
 <span class="fu"><a href="https://rdrr.io/r/base/levels.html">levels</a></span>(<span class="kw">d</span><span class="op">$</span><span class="kw">dmg</span><span class="op">$</span><span class="kw">age_group_subcat</span>)                                                  
-<span class="co">#&gt; [1] "Stillbirth"                              </span>
-<span class="co">#&gt; [2] "Death in the first 24 hours"             </span>
-<span class="co">#&gt; [3] "Early Neonate (24-72 hours)"             </span>
-<span class="co">#&gt; [4] "Early Neonate (72+hrs to 6 days)"        </span>
-<span class="co">#&gt; [5] "Late Neonate (7 to 27 days)"             </span>
-<span class="co">#&gt; [6] "Infant (28 days to less than 6 months)"  </span>
+<span class="co">#&gt; [1] "Stillbirth"</span>
+<span class="co">#&gt; [2] "Death in the first 24 hours"</span>
+<span class="co">#&gt; [3] "Early Neonate (24-72 hours)"</span>
+<span class="co">#&gt; [4] "Early Neonate (72+hrs to 6 days)"</span>
+<span class="co">#&gt; [5] "Late Neonate (7 to 27 days)"</span>
+<span class="co">#&gt; [6] "Infant (28 days to less than 6 months)"</span>
 <span class="co">#&gt; [7] "Infant (6 months to less than 12 months)"</span>
 <span class="co">#&gt; [8] "Child (12 months to less than 60 Months)"</span>
 </pre></div>
@@ -317,10 +317,9 @@
 <span class="co">#&gt; # A tibble: 1,476 x 66</span>
 <span class="co">#&gt;    champs_deid immediate_cod ic_champs_group… underlying_cause uc_champs_group…</span>
 <span class="co">#&gt;    &lt;chr&gt;       &lt;chr&gt;         &lt;chr&gt;            &lt;chr&gt;            &lt;chr&gt;           </span>
-<span class="co">#&gt;  1 B6F81D28-C… B24           Maternal HIV     P22.0            Neonatal preter…</span>
-<span class="co">#&gt;  2 56550401-2… P07.1         Neonatal preter… P36.1            Neonatal sepsis </span>
-<span class="co">#&gt;  3 BA74FEEB-7… P20           Perinatal asphy… P36.8            Neonatal sepsis </span>
-<span class="co">#&gt; # … with 1,473 more rows, and 61 more variables:</span>
+<span class="co">#&gt;  1 56550401-2… P07.1         Neonatal preter… P36.1            Neonatal sepsis </span>
+<span class="co">#&gt;  2 BA74FEEB-7… P20           Perinatal asphy… P36.8            Neonatal sepsis </span>
+<span class="co">#&gt; # … with 1,474 more rows, and 61 more variables:</span>
 <span class="co">#&gt; #   main_maternal_disease_condition &lt;chr&gt;, morbid_condition_01 &lt;chr&gt;,</span>
 <span class="co">#&gt; #   morbid_cond_01_champs_group_desc &lt;chr&gt;, morbid_condition_02 &lt;chr&gt;,</span>
 <span class="co">#&gt; #   morbid_cond_02_champs_group_desc &lt;chr&gt;, morbid_condition_03 &lt;chr&gt;,</span>
@@ -353,24 +352,26 @@
 <span class="co">#&gt; #   morbid_condition_08_etiol1 &lt;lgl&gt;, morbid_condition_08_etiol2 &lt;lgl&gt;,</span>
 <span class="co">#&gt; #   morbid_condition_08_etiol3 &lt;lgl&gt;</span>
 </pre></div>
-<p>For each case, information about the causes of death determined by the DeCoDe panel can be found. These are either available as CHAMPS group descriptions (ending with <code>_champs_group_desc</code>) and etiologies (ending with <code>_etiol</code>) if applicable. Immediate and underlying causes of death, along with morbid conditions or other significant conditions, are classified as ICD10 codes, CHAMPS group descriptions, and with etiologies depending on the causes.</p>
+<p>For each case, information about the causes of death determined by the DeCoDe panel can be found. These are available as CHAMPS group descriptions (ending with <code>_champs_group_desc</code>) and etiologies (ending with <code>_etiol</code>) if applicable. Immediate and underlying causes of death, along with morbid conditions, are classified as ICD10 codes, CHAMPS group descriptions, and with etiologies depending on the causes. The Other significant conditions are only classified as ICD10 codes at this time in the dataset.</p>
 <p>Similar to what was done with the TAC long table, a long version of the DeCoDe table can be convenient for many analyses. We pivoted the data to long format such that there is one row per each etiology (1-3) and “type” of variable (immediate, underlying, morbid_condition_0*), with the corresponding CHAMPS group descriptions being repeated for each type.</p>
 <p>Let’s take a glimpse at the data for one case in long form:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1">dplyr<span class="op">::</span><span class="kw">filter</span>(d<span class="op">$</span>dcd_long, champs_deid <span class="op">==</span><span class="st"> </span>d<span class="op">$</span>dcd_long<span class="op">$</span>champs_deid[<span class="dv">1500</span>]) </a>
-<a class="sourceLine" id="cb9-2" data-line-number="2"><span class="co"># A tibble: 30 x 5</span></a>
-<a class="sourceLine" id="cb9-3" data-line-number="3">   champs_deid        champs_group_desc       type     etiol          etiol_num</a>
-<a class="sourceLine" id="cb9-4" data-line-number="4">   <span class="op">&lt;</span>chr<span class="op">&gt;</span><span class="st">              </span><span class="er">&lt;</span>chr<span class="op">&gt;</span><span class="st">                   </span><span class="er">&lt;</span>chr<span class="op">&gt;</span><span class="st">    </span><span class="er">&lt;</span>chr<span class="op">&gt;</span><span class="st">              </span><span class="er">&lt;</span>int<span class="op">&gt;</span></a>
-<a class="sourceLine" id="cb9-5" data-line-number="5"><span class="st"> </span><span class="dv">1</span> FF205E2D<span class="op">-</span>7F81<span class="op">-</span>4A…  Neonatal sepsis         immedi…  Escherichia c…         <span class="dv">1</span></a>
-<a class="sourceLine" id="cb9-6" data-line-number="6"> <span class="dv">2</span> FF205E2D<span class="op">-</span>7F81<span class="op">-</span>4A…  Neonatal sepsis         immedi…  <span class="ot">NA</span>                     <span class="dv">2</span></a>
-<a class="sourceLine" id="cb9-7" data-line-number="7"> <span class="dv">3</span> FF205E2D<span class="op">-</span>7F81<span class="op">-</span>4A…  Neonatal sepsis         immedi…  <span class="ot">NA</span>                     <span class="dv">3</span></a>
-<a class="sourceLine" id="cb9-8" data-line-number="8"> <span class="dv">4</span> FF205E2D<span class="op">-</span>7F81<span class="op">-</span>4A…  Lower respiratory inf…  underl…  Escherichia c…         <span class="dv">1</span></a>
-<a class="sourceLine" id="cb9-9" data-line-number="9"> <span class="dv">5</span> FF205E2D<span class="op">-</span>7F81<span class="op">-</span>4A…  Lower respiratory inf…  underl…  <span class="ot">NA</span>                     <span class="dv">2</span></a>
-<a class="sourceLine" id="cb9-10" data-line-number="10"> <span class="dv">6</span> FF205E2D<span class="op">-</span>7F81<span class="op">-</span>4A…  Lower respiratory inf…  underl…  <span class="ot">NA</span>                     <span class="dv">3</span></a>
-<a class="sourceLine" id="cb9-11" data-line-number="11"> <span class="dv">7</span> FF205E2D<span class="op">-</span>7F81<span class="op">-</span>4A…  Meningitis<span class="op">/</span>Encephalit…  morbid…  Escherichia c…         <span class="dv">1</span></a>
-<a class="sourceLine" id="cb9-12" data-line-number="12"> <span class="dv">8</span> FF205E2D<span class="op">-</span>7F81<span class="op">-</span>4A…  Meningitis<span class="op">/</span>Encephalit…  morbid…  <span class="ot">NA</span>                     <span class="dv">2</span></a>
-<a class="sourceLine" id="cb9-13" data-line-number="13"> <span class="dv">9</span> FF205E2D<span class="op">-</span>7F81<span class="op">-</span>4A…  Meningitis<span class="op">/</span>Encephalit…  morbid…  <span class="ot">NA</span>                     <span class="dv">3</span></a>
-<a class="sourceLine" id="cb9-14" data-line-number="14"><span class="dv">10</span> FF205E2D<span class="op">-</span>7F81<span class="op">-</span>4A…  <span class="ot">NA</span>                      morbid…  <span class="ot">NA</span>                     <span class="dv">1</span></a>
-<a class="sourceLine" id="cb9-15" data-line-number="15"><span class="co"># … with 20 more rows</span></a></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="downlit">
+<span class="kw">dplyr</span>::<span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(<span class="kw">d</span><span class="op">$</span><span class="kw">dcd_long</span>, <span class="kw">champs_deid</span> <span class="op">==</span> <span class="kw">d</span><span class="op">$</span><span class="kw">dcd_long</span><span class="op">$</span><span class="kw">champs_deid</span>[<span class="fl">1500</span>]) 
+<span class="co">#&gt; # A tibble: 30 x 5</span>
+<span class="co">#&gt;    champs_deid        champs_group_desc       type     etiol          etiol_num</span>
+<span class="co">#&gt;    &lt;chr&gt;              &lt;chr&gt;                   &lt;chr&gt;    &lt;chr&gt;              &lt;int&gt;</span>
+<span class="co">#&gt;  1 FF205E2D-7F81-4A…  Neonatal sepsis         immedi…  Escherichia c…         1</span>
+<span class="co">#&gt;  2 FF205E2D-7F81-4A…  Neonatal sepsis         immedi…  NA                     2</span>
+<span class="co">#&gt;  3 FF205E2D-7F81-4A…  Neonatal sepsis         immedi…  NA                     3</span>
+<span class="co">#&gt;  4 FF205E2D-7F81-4A…  Lower respiratory inf…  underl…  Escherichia c…         1</span>
+<span class="co">#&gt;  5 FF205E2D-7F81-4A…  Lower respiratory inf…  underl…  NA                     2</span>
+<span class="co">#&gt;  6 FF205E2D-7F81-4A…  Lower respiratory inf…  underl…  NA                     3</span>
+<span class="co">#&gt;  7 FF205E2D-7F81-4A…  Meningitis/Encephalit…  morbid…  Escherichia c…         1</span>
+<span class="co">#&gt;  8 FF205E2D-7F81-4A…  Meningitis/Encephalit…  morbid…  NA                     2</span>
+<span class="co">#&gt;  9 FF205E2D-7F81-4A…  Meningitis/Encephalit…  morbid…  NA                     3</span>
+<span class="co">#&gt; 10 FF205E2D-7F81-4A…  NA                      morbid…  NA                     1</span>
+<span class="co">#&gt; # … with 20 more rows</span>
+</pre></div>
 <p>Here we see that this case has an immediate CHAMPS group description of “Neonatal sepsis” with an etiology of “Escherichia coli”, and an underlying CHAMPS group description of “Lower respiratory infections”. The long format provides us with a more convenient way to search for specific CHAMPS group descriptions or etiologies, in that we can search for a term in one column rather than across many columns.</p>
 <p>Note that for a given case and type, whenever a <code>champs_group_desc</code> and <code>etiol</code> are all <code>NA</code>, we omit that data.</p>
 <!-- We have kept the `NA` values for the three `etiol` in the long format table for any `champs_group_desc` with a value. Users can filter to the `dcd_pivot` table to exclude all `etiol`'s that are `NA` but should be cautious to keep the first `etiol` whether or not it is `NA` for table calculations related to `champs_group desc` and `type`. -->

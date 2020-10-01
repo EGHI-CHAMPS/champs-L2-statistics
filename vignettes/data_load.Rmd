@@ -98,9 +98,9 @@ At a high level, `load_data()` makes the following changes to the data as it rea
 
 The demographic data provides ISO country site codes. We add a `site` variable built from `site_iso_code` that is a factor with levels: Bangladesh, Kenya, Mali, Mozambique, South Africa, Ethiopia, Sierra Leone.
 
-We also add a categorical postmortem interval range (`pmi_range`) variable based on the `calc_postmortem_hrs` variable. `pmi_range` had nine levels - "0 to 3", "4 to 6", "7 to 9", "10 to 12", "13 to 15", "16 to 18", "19 to 21", "22 to 24", "Over 24h". 
+We also add a categorical postmortem interval range (`pmi_range`) variable based on the `calc_postmortem_hrs` variable. `pmi_range` had nine levels - "0 to 3", "4 to 6", "7 to 9", "10 to 12", "13 to 15", "16 to 18", "19 to 21", "22 to 24", "Over 24h". This represents time between death and the MITS procedure and collection of specimens.
 
-Finally, we add two new variables that represent if the case pathogens were acquired from the community or during during their hospital stay,`acquired24` and `acquired48`, depending on the length of hospitalization before death. If the location of death was in the community or death was in the first 24 hours of life or a hospital stay was less than 24 hours then `acquired24 = "Community"`. If the location of death was in the community or death was a stillbirth or in the first 24 hours or a hospital stay less than 48 hours yields `acquired48 = "Community"`. All other values in both variables were marked "Facility".
+Finally, we add two new variables that represent if the case pathogens were acquired from the community or during their hospital stay, `acquired24` and `acquired48`, depending on the length of hospitalization before death. If the location of death was in the community, or death was a stillbirth or in the first 24 hours of life or a hospital stay was less than 24 hours then `acquired24 = "Community"`. If the location of death was in the community or death was a stillbirth or in the first 24 hours or a hospital stay less than 48 hours yields `acquired48 = "Community"`. All other values in both variables were marked "Facility". A limitation for this variable is that it only considers a hospitalization immediately preceding death and does not capture hospitalizations with a discharge prior to death.
 
 ### Demographic factors
 
@@ -122,8 +122,8 @@ In the raw data, there are four values recorded for `age_group_subcat` which we 
 
 | Original     | New                                      |
 | ----         | ----                                     |
-| infant_>6M   | Infant (28 days to less than 6 months)   |
-| infant_6M    | Infant (6 months to less than 12 months) |
+| infant_>6M   | Infant (6 months to less than 12 months) |
+| infant_6M    | Infant (28 days to less than 6 months)   |
 | neonate_72h  | Early Neonate (24-72 hours)              |
 | neonate_>72h | Early Neonate (72+hrs to 6 days)         |
 
@@ -131,12 +131,12 @@ All other values of `age_group_subcat` are missing in the raw data. We replace t
 
 ```r
 levels(d$dmg$age_group_subcat)                                                  
-#> [1] "Stillbirth"                              
-#> [2] "Death in the first 24 hours"             
-#> [3] "Early Neonate (24-72 hours)"             
-#> [4] "Early Neonate (72+hrs to 6 days)"        
-#> [5] "Late Neonate (7 to 27 days)"             
-#> [6] "Infant (28 days to less than 6 months)"  
+#> [1] "Stillbirth"
+#> [2] "Death in the first 24 hours"
+#> [3] "Early Neonate (24-72 hours)"
+#> [4] "Early Neonate (72+hrs to 6 days)"
+#> [5] "Late Neonate (7 to 27 days)"
+#> [6] "Infant (28 days to less than 6 months)"
 #> [7] "Infant (6 months to less than 12 months)"
 #> [8] "Child (12 months to less than 60 Months)"
 ```
@@ -197,10 +197,9 @@ d$dcd
 #> # A tibble: 1,476 x 66
 #>    champs_deid immediate_cod ic_champs_group… underlying_cause uc_champs_group…
 #>    <chr>       <chr>         <chr>            <chr>            <chr>           
-#>  1 B6F81D28-C… B24           Maternal HIV     P22.0            Neonatal preter…
-#>  2 56550401-2… P07.1         Neonatal preter… P36.1            Neonatal sepsis 
-#>  3 BA74FEEB-7… P20           Perinatal asphy… P36.8            Neonatal sepsis 
-#> # … with 1,473 more rows, and 61 more variables:
+#>  1 56550401-2… P07.1         Neonatal preter… P36.1            Neonatal sepsis 
+#>  2 BA74FEEB-7… P20           Perinatal asphy… P36.8            Neonatal sepsis 
+#> # … with 1,474 more rows, and 61 more variables:
 #> #   main_maternal_disease_condition <chr>, morbid_condition_01 <chr>,
 #> #   morbid_cond_01_champs_group_desc <chr>, morbid_condition_02 <chr>,
 #> #   morbid_cond_02_champs_group_desc <chr>, morbid_condition_03 <chr>,
@@ -234,7 +233,7 @@ d$dcd
 #> #   morbid_condition_08_etiol3 <lgl>
 ```
 
-For each case, information about the causes of death determined by the DeCoDe panel can be found. These are either available as CHAMPS group descriptions (ending with `_champs_group_desc`) and etiologies (ending with `_etiol`) if applicable. Immediate and underlying causes of death, along with morbid conditions or other significant conditions, are classified as ICD10 codes, CHAMPS group descriptions, and with etiologies depending on the causes. 
+For each case, information about the causes of death determined by the DeCoDe panel can be found. These are available as CHAMPS group descriptions (ending with `_champs_group_desc`) and etiologies (ending with `_etiol`) if applicable. Immediate and underlying causes of death, along with morbid conditions, are classified as ICD10 codes, CHAMPS group descriptions, and with etiologies depending on the causes. The Other significant conditions are only classified as ICD10 codes at this time in the dataset.
 
 Similar to what was done with the TAC long table, a long version of the DeCoDe table can be convenient for many analyses. We pivoted the data to long format such that there is one row per each etiology (1-3) and "type" of variable (immediate, underlying, morbid_condition_0*), with the corresponding CHAMPS group descriptions being repeated for each type.
 
@@ -242,20 +241,20 @@ Let's take a glimpse at the data for one case in long form:
 
 ```r
 dplyr::filter(d$dcd_long, champs_deid == d$dcd_long$champs_deid[1500]) 
-# A tibble: 30 x 5
-   champs_deid        champs_group_desc       type     etiol          etiol_num
-   <chr>              <chr>                   <chr>    <chr>              <int>
- 1 FF205E2D-7F81-4A…  Neonatal sepsis         immedi…  Escherichia c…         1
- 2 FF205E2D-7F81-4A…  Neonatal sepsis         immedi…  NA                     2
- 3 FF205E2D-7F81-4A…  Neonatal sepsis         immedi…  NA                     3
- 4 FF205E2D-7F81-4A…  Lower respiratory inf…  underl…  Escherichia c…         1
- 5 FF205E2D-7F81-4A…  Lower respiratory inf…  underl…  NA                     2
- 6 FF205E2D-7F81-4A…  Lower respiratory inf…  underl…  NA                     3
- 7 FF205E2D-7F81-4A…  Meningitis/Encephalit…  morbid…  Escherichia c…         1
- 8 FF205E2D-7F81-4A…  Meningitis/Encephalit…  morbid…  NA                     2
- 9 FF205E2D-7F81-4A…  Meningitis/Encephalit…  morbid…  NA                     3
-10 FF205E2D-7F81-4A…  NA                      morbid…  NA                     1
-# … with 20 more rows
+#> # A tibble: 30 x 5
+#>    champs_deid        champs_group_desc       type     etiol          etiol_num
+#>    <chr>              <chr>                   <chr>    <chr>              <int>
+#>  1 FF205E2D-7F81-4A…  Neonatal sepsis         immedi…  Escherichia c…         1
+#>  2 FF205E2D-7F81-4A…  Neonatal sepsis         immedi…  NA                     2
+#>  3 FF205E2D-7F81-4A…  Neonatal sepsis         immedi…  NA                     3
+#>  4 FF205E2D-7F81-4A…  Lower respiratory inf…  underl…  Escherichia c…         1
+#>  5 FF205E2D-7F81-4A…  Lower respiratory inf…  underl…  NA                     2
+#>  6 FF205E2D-7F81-4A…  Lower respiratory inf…  underl…  NA                     3
+#>  7 FF205E2D-7F81-4A…  Meningitis/Encephalit…  morbid…  Escherichia c…         1
+#>  8 FF205E2D-7F81-4A…  Meningitis/Encephalit…  morbid…  NA                     2
+#>  9 FF205E2D-7F81-4A…  Meningitis/Encephalit…  morbid…  NA                     3
+#> 10 FF205E2D-7F81-4A…  NA                      morbid…  NA                     1
+#> # … with 20 more rows
 ```
 
 Here we see that this case has an immediate CHAMPS group description of "Neonatal sepsis" with an etiology of "Escherichia coli", and an underlying CHAMPS group description of "Lower respiratory infections". The long format provides us with a more convenient way to search for specific CHAMPS group descriptions or etiologies, in that we can search for a term in one column rather than across many columns.

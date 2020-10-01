@@ -98,7 +98,7 @@ Often we want to tabulate results for specific sets of TAC specimen types. To ge
 valid_specimen_types(d)
 ```
 
-In our examples below, we will often compute statistics for all specimen types excluding nasopharyngeal and oropharyngeal swab, as well as all specimen types. We will specify these as `specimen_types1` and `specimen_types2`:
+In our examples below, we will often compute statistics for all specimen types excluding nasopharyngeal and oropharyngeal swab, as well as all specimen types. We will specify these as `specimen_types1` and `specimen_types2`, respectively:
 
 ```{r}
 specimen_types1 <- c(
@@ -260,7 +260,7 @@ Note that a dataset comes with the package, `infectious_causes`, which is used i
 champs::infectious_causes
 ```
 
-Also note that cases in the "Contributing (P2)" category are found using the ICD10 codes provided to the function. There are only a small subset of pathogens that this categorization into "Contributing (P2)" can occur based only on ICD-10 codes, all others would need the ability to search in the free text field which is not part of the L2 dataset.
+Also note that cases in the "Contributing (P2)" category are found using the ICD10 codes in the Other significant condition variable provided to the function. There are only a small subset of pathogens that this categorization into "Contributing (P2)" can occur based only on ICD-10 codes, all others would need the ability to search in the free text field which is not part of the L2 dataset.
 
 ## Top pathogens in causal chain
 
