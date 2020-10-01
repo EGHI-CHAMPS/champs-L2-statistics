@@ -178,45 +178,13 @@ If not provided, all sites will be used. See <code><a href='valid_sites.html'>va
 
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'>calc_top_dcd_pathogens_by_acq</span>(<span class='kw'>mock</span>,
+    <pre class="examples"><span class='fu'>calc_top_dcd_pathogens_by_acq</span>(<span class='kw'>mock</span>,
   condition = <span class='st'>"Lower respiratory infections"</span>,
   age_groups = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(
     <span class='st'>"Infant (28 days to less than 12 months)"</span>,
     <span class='st'>"Child (12 months to less than 60 Months)"</span>)
 )
-</div><div class='output co'>#&gt; $version
-#&gt; <span style='color: #555555;'># A tibble: 1 x 3</span><span>
-#&gt;   dataset_name       dataset_version dataset_release_date
-#&gt;   </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>                        </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;date&gt;</span><span>              
-#&gt; </span><span style='color: #555555;'>1</span><span> CHAMPS Level2 Data             4.1 2020-08-01          
-#&gt; 
-#&gt; $table
-#&gt; </span><span style='color: #555555;'># A tibble: 19 x 4</span><span>
-#&gt; </span><span style='color: #555555;'># Groups:   etiol [19]</span><span>
-#&gt;    etiol                                        Community Facility Total
-#&gt;    </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>                                            </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span>    </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span>
-#&gt; </span><span style='color: #555555;'> 1</span><span> Streptococcus pneumoniae                            23        1    24
-#&gt; </span><span style='color: #555555;'> 2</span><span> Klebsiella pneumoniae                               13        6    19
-#&gt; </span><span style='color: #555555;'> 3</span><span> Pneumocystis jirovecii                               7        1     8
-#&gt; </span><span style='color: #555555;'> 4</span><span> Haemophilus influenzae                               6        1     7
-#&gt; </span><span style='color: #555555;'> 5</span><span> Cytomegalovirus (CMV)                                5        1     6
-#&gt; </span><span style='color: #555555;'> 6</span><span> Respiratory syncytial virus (RSV)                    3        3     6
-#&gt; </span><span style='color: #555555;'> 7</span><span> Staphylococcus aureus                                5        1     6
-#&gt; </span><span style='color: #555555;'> 8</span><span> Escherichia coli                                     4        1     5
-#&gt; </span><span style='color: #555555;'> 9</span><span> Parainfluenza virus type 3                           1        2     3
-#&gt; </span><span style='color: #555555;'>10</span><span> Influenza A                                          1        1     2
-#&gt; </span><span style='color: #555555;'>11</span><span> Influenza B                                          1        1     2
-#&gt; </span><span style='color: #555555;'>12</span><span> Pseudomonas aeruginosa                               1        1     2
-#&gt; </span><span style='color: #555555;'>13</span><span> Streptococcus pyogenes                               1        1     2
-#&gt; </span><span style='color: #555555;'>14</span><span> Candida albicans                                    </span><span style='color: #BB0000;'>NA</span><span>        1    </span><span style='color: #BB0000;'>NA</span><span>
-#&gt; </span><span style='color: #555555;'>15</span><span> Human metapneumovirus (HMPV)                        </span><span style='color: #BB0000;'>NA</span><span>        1    </span><span style='color: #BB0000;'>NA</span><span>
-#&gt; </span><span style='color: #555555;'>16</span><span> Parainfluenza virus type 1                           1       </span><span style='color: #BB0000;'>NA</span><span>    </span><span style='color: #BB0000;'>NA</span><span>
-#&gt; </span><span style='color: #555555;'>17</span><span> Rhinovirus                                           2       </span><span style='color: #BB0000;'>NA</span><span>    </span><span style='color: #BB0000;'>NA</span><span>
-#&gt; </span><span style='color: #555555;'>18</span><span> Salmonella enterica  sub-species paratyphi A        </span><span style='color: #BB0000;'>NA</span><span>        1    </span><span style='color: #BB0000;'>NA</span><span>
-#&gt; </span><span style='color: #555555;'>19</span><span> Streptococcus agalactiae                             1       </span><span style='color: #BB0000;'>NA</span><span>    </span><span style='color: #BB0000;'>NA</span><span>
-#&gt; 
-#&gt; attr(,"class")
-#&gt; [1] "champs_computed"               "calc_top_dcd_pathogens_by_acq"</div></span></pre>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

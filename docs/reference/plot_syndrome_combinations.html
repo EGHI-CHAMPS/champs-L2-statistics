@@ -201,7 +201,7 @@ Defaults to a line break.</p></td>
   size to include long names.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>mock_syndrome</span> <span class='op'>&lt;-</span> <span class='fu'><a href='calc_syndrome_combinations.html'>calc_syndrome_combinations</a></span>(<span class='kw'>mock</span>,
+    <pre class="examples"><span class='kw'>mock_syndrome</span> <span class='op'>&lt;-</span> <span class='fu'><a href='calc_syndrome_combinations.html'>calc_syndrome_combinations</a></span>(<span class='kw'>mock</span>,
 condition = <span class='st'>"Streptococcus pneumoniae"</span>,
 syndrome_names = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(
   <span class='st'>"Lower respiratory infections"</span>,
@@ -220,26 +220,26 @@ specimen_types = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a><
 )
 
 <span class='fu'>plot_syndrome_combinations</span>(<span class='kw'>mock_syndrome</span>, legend_location = <span class='st'>"none"</span>)
-</div><div class='img'><img src='plot_syndrome_combinations-1.png' alt='' width='700' height='433' /></div><div class='input'><span class='fu'>plot_syndrome_combinations</span>(<span class='kw'>mock_syndrome</span>, legend_location = <span class='st'>"none"</span>,
+<span class='fu'>plot_syndrome_combinations</span>(<span class='kw'>mock_syndrome</span>, legend_location = <span class='st'>"none"</span>,
   plot_type = <span class='st'>"bar"</span>)
-</div><div class='img'><img src='plot_syndrome_combinations-2.png' alt='' width='700' height='433' /></div><div class='input'><span class='fu'>plot_syndrome_combinations</span>(<span class='kw'>mock_syndrome</span>, legend_location = <span class='st'>"none"</span>,
+<span class='fu'>plot_syndrome_combinations</span>(<span class='kw'>mock_syndrome</span>, legend_location = <span class='st'>"none"</span>,
   plot_type = <span class='st'>"bar"</span>, include_text = <span class='st'>"full_percent"</span>)
-</div><div class='img'><img src='plot_syndrome_combinations-3.png' alt='' width='700' height='433' /></div><div class='input'><span class='fu'>plot_syndrome_combinations</span>(<span class='kw'>mock_syndrome</span>, legend_location = <span class='st'>"none"</span>,
+<span class='fu'>plot_syndrome_combinations</span>(<span class='kw'>mock_syndrome</span>, legend_location = <span class='st'>"none"</span>,
   include_text = <span class='st'>"full_percent"</span>)
-</div><div class='img'><img src='plot_syndrome_combinations-4.png' alt='' width='700' height='433' /></div><div class='input'><span class='fu'>plot_syndrome_combinations</span>(<span class='kw'>mock_syndrome</span>, <span class='st'>"age_breakdown"</span>,
+<span class='fu'>plot_syndrome_combinations</span>(<span class='kw'>mock_syndrome</span>, <span class='st'>"age_breakdown"</span>,
   legend_location = <span class='st'>"none"</span>, include_text = <span class='st'>"full_percent"</span>)
-</div><div class='img'><img src='plot_syndrome_combinations-5.png' alt='' width='700' height='433' /></div><div class='input'><span class='fu'>plot_syndrome_combinations</span>(<span class='kw'>mock_syndrome</span>, <span class='st'>"tac_age_breakdown"</span>,
+<span class='fu'>plot_syndrome_combinations</span>(<span class='kw'>mock_syndrome</span>, <span class='st'>"tac_age_breakdown"</span>,
   legend_location = <span class='st'>"none"</span>, include_text = <span class='st'>"full_number"</span>)
-</div><div class='img'><img src='plot_syndrome_combinations-6.png' alt='' width='700' height='433' /></div><div class='input'><span class='fu'>plot_syndrome_combinations</span>(<span class='kw'>mock_syndrome</span>, <span class='st'>"age_breakdown"</span>,
+<span class='fu'>plot_syndrome_combinations</span>(<span class='kw'>mock_syndrome</span>, <span class='st'>"age_breakdown"</span>,
   legend_location = <span class='st'>"none"</span>, include_text = <span class='st'>"full_number"</span>,
   full_separator = <span class='st'>","</span>)
-</div><div class='img'><img src='plot_syndrome_combinations-7.png' alt='' width='700' height='433' /></div><div class='input'><span class='fu'>plot_syndrome_combinations</span>(<span class='kw'>mock_syndrome</span>, <span class='st'>"age_breakdown"</span>,
+<span class='fu'>plot_syndrome_combinations</span>(<span class='kw'>mock_syndrome</span>, <span class='st'>"age_breakdown"</span>,
   plot_type = <span class='st'>"pie"</span>, legend_location = <span class='st'>"none"</span>,
   include_text = <span class='st'>"full_number"</span>, full_separator = <span class='st'>","</span>)
-</div><div class='img'><img src='plot_syndrome_combinations-8.png' alt='' width='700' height='433' /></div><div class='input'><span class='fu'>plot_syndrome_combinations</span>(<span class='kw'>mock_syndrome</span>, <span class='st'>"tac_age_breakdown"</span>,
+<span class='fu'>plot_syndrome_combinations</span>(<span class='kw'>mock_syndrome</span>, <span class='st'>"tac_age_breakdown"</span>,
   plot_type = <span class='st'>"bar"</span>, legend_location = <span class='st'>"none"</span>,
   include_text = <span class='st'>"full_number"</span>, full_separator = <span class='st'>","</span>)
-</div><div class='img'><img src='plot_syndrome_combinations-9.png' alt='' width='700' height='433' /></div></pre>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

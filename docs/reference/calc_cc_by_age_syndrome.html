@@ -197,7 +197,7 @@ If not provided, all sites will be used. See <code><a href='valid_sites.html'>va
 
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'>calc_cc_by_age_syndrome</span>(<span class='kw'>mock</span>,
+    <pre class="examples"><span class='fu'>calc_cc_by_age_syndrome</span>(<span class='kw'>mock</span>,
   condition = <span class='st'>"Streptococcus pneumoniae"</span>,
   syndrome_names = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(
     <span class='st'>"Lower respiratory infections"</span>,
@@ -210,26 +210,7 @@ If not provided, all sites will be used. See <code><a href='valid_sites.html'>va
     <span class='st'>"Sepsis"</span>,
     <span class='st'>"Sepsis"</span>)
 )
-</div><div class='output co'>#&gt; $version
-#&gt; <span style='color: #555555;'># A tibble: 1 x 3</span><span>
-#&gt;   dataset_name       dataset_version dataset_release_date
-#&gt;   </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>                        </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;date&gt;</span><span>              
-#&gt; </span><span style='color: #555555;'>1</span><span> CHAMPS Level2 Data             4.1 2020-08-01          
-#&gt; 
-#&gt; $table
-#&gt; </span><span style='color: #555555;'># A tibble: 6 x 8</span><span>
-#&gt;   age_group Meningitis `Meningitis, Pn… `Meningitis, Pn… Pneumonia
-#&gt;   </span><span style='color: #555555;font-style: italic;'>&lt;fct&gt;</span><span>          </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span>            </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span>            </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span>     </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span>
-#&gt; </span><span style='color: #555555;'>1</span><span> Stillbir…          0                0                0         0
-#&gt; </span><span style='color: #555555;'>2</span><span> Death in…          0                0                0         1
-#&gt; </span><span style='color: #555555;'>3</span><span> Early Ne…          0                0                0         0
-#&gt; </span><span style='color: #555555;'>4</span><span> Late Neo…          0                0                0         0
-#&gt; </span><span style='color: #555555;'>5</span><span> Infant (…          0                0                1         4
-#&gt; </span><span style='color: #555555;'>6</span><span> Child (1…          1                1                1         6
-#&gt; </span><span style='color: #555555;'># … with 3 more variables: `Pneumonia, Sepsis` </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span style='color: #555555;'>, Sepsis </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span style='color: #555555;'>, `NA` </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span>
-#&gt; 
-#&gt; attr(,"class")
-#&gt; [1] "champs_computed"         "calc_cc_by_age_syndrome"</div></span></pre>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
