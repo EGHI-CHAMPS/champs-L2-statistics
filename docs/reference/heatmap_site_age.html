@@ -153,7 +153,8 @@
   <span class='kw'>x</span>,
   plot_title = <span class='st'>""</span>,
   plot_subtitle = <span class='st'>""</span>,
-  include_text = <span class='st'>"percent"</span>
+  include_text = <span class='st'>"percent"</span>,
+  color_limits = <span class='kw'>NULL</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -176,6 +177,13 @@ denominator of counts.</p></td>
       <th>include_text</th>
       <td><p>Whether to include the percentages "percent", or
 fraction "fraction". Defaults to NULL which is none.</p></td>
+    </tr>
+    <tr>
+      <th>color_limits</th>
+      <td><p>maps to the limits argument in the fill scale of
+ggplot2. Defaults to NULL which is the max and min of the data. Specify
+the limits in proportions like c(0, 0.25) to have standard limits for
+multiple charts set to 0% to 25%.</p></td>
     </tr>
     </table>
 
