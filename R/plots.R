@@ -623,3 +623,4 @@ heatmap_site_age <- function(x,
          subtitle = plot_subtitle) +
     ggplot2::theme_minimal()
 }
+
