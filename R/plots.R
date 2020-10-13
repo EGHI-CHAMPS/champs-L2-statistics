@@ -589,7 +589,7 @@ heatmap_site_age <- function(x,
     dplyr::mutate(print_percent =
       stringr::str_c(round(100 * .data$proportion, 1), "%"),
       print_fraction = stringr::str_c(.data$numerator, "/", .data$denominator),
-      proportion_nozero = ifelse(proportion == 0, NA, proportion)) # fill based on this variable.
+      proportion_nozero = ifelse(.data$proportion == 0, NA, .data$proportion)) # fill based on this variable.
   
   # labels are based on include_text argument
   # ifelse handles the NULL check issue
