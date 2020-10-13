@@ -23,3 +23,11 @@ Then you can install the `champs` package with:
 ```r
 remotes::install_github("EGHI-CHAMPS/champs-L2-statistics")
 ```
+
+Now you are ready to load the package and use it:
+
+```r
+library(champs)
+```
+
+You can find documentation [here](https://eghi-champs.github.io/champs-L2-statistics/) that will walk you through how to get CHAMPS L2 data and start analyzing it with this package.
