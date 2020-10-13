@@ -551,14 +551,10 @@ plot_margins_site_age <- function(x,
 #'
 #' @param x A computed CHAMPS object that includes a numerator and
 #'   denominator of counts.
-#' @param plot_title is the title for the plot.
-#' @param plot_subtitle is the subtitle for the plot.
 #' @param include_text Whether to include the percentages "percent", or
 #' fraction "fraction". Defaults to NULL which is none.
-#' @param color_limits maps to the limits argument in the fill scale of ggplot2. 
-#' Defaults to NULL which is the max and min of the data. Specify the limits 
-#' in proportions like c(0, .25) to have standard limits for multiple charts set
-#' to 0% to 25%.
+#' @param plot_title is the title for the plot.
+#' @param plot_subtitle is the subtitle for the plot.
 #' @export
 #' @examples
 #' mock_calc <- calc_cc_allcases_by_site_age(mock,
@@ -570,8 +566,7 @@ plot_margins_site_age <- function(x,
 heatmap_site_age <- function(x,
   plot_title = "",
   plot_subtitle = "",
-  include_text = "percent",
-  color_limits = NULL
+  include_text = "percent"
 ) {
   check_champs_object(x)
 
@@ -588,9 +583,7 @@ heatmap_site_age <- function(x,
     dplyr::mutate_if(is.character, forcats::fct_inorder) %>%
     dplyr::mutate(print_percent =
       stringr::str_c(round(100 * .data$proportion, 1), "%"),
-      print_fraction = stringr::str_c(.data$numerator, "/", .data$denominator),
-      proportion_nozero = ifelse(.data$proportion == 0, NA, .data$proportion)) # fill based on this variable.
-  
+      print_fraction = stringr::str_c(.data$numerator, "/", .data$denominator))
   # labels are based on include_text argument
   # ifelse handles the NULL check issue
   if (is.null(include_text)) {
@@ -612,15 +605,12 @@ heatmap_site_age <- function(x,
   d_tidy %>%
     dplyr::mutate(age_group = forcats::fct_rev(.data$age_group)) %>%
     ggplot2::ggplot(aes(x = .data$site, y = .data$age_group,
-      fill = .data$proportion_nozero)) +
+      fill = .data$proportion)) +
     ggplot2::geom_tile(color = "white", show.legend = FALSE) +
     ggplot2::geom_text(aes(label = .data$label_var), color = "white") +
     ggplot2::scale_x_discrete(position = "top") +
-    ggplot2::scale_fill_gradient(high = "#132B43", low = "#56B1F7", 
-      na.value = "grey60", limits = color_limits) +
     ggplot2::labs(x = "", y = "",
          title = plot_title,
          subtitle = plot_subtitle) +
     ggplot2::theme_minimal()
 }
-

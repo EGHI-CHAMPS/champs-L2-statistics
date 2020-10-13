@@ -8,8 +8,7 @@ heatmap_site_age(
   x,
   plot_title = "",
   plot_subtitle = "",
-  include_text = "percent",
-  color_limits = NULL
+  include_text = "percent"
 )
 }
 \arguments{
@@ -22,11 +21,6 @@ denominator of counts.}
 
 \item{include_text}{Whether to include the percentages "percent", or
 fraction "fraction". Defaults to NULL which is none.}
-
-\item{color_limits}{maps to the limits argument in the fill scale of ggplot2. 
-Defaults to NULL which is the max and min of the data. Specify the limits 
-in proportions like c(0, .25) to have standard limits for multiple charts set
-to 0% to 25%.}
 }
 \description{
 Plot the percents of a computed CHAMPS table
